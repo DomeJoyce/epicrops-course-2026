@@ -195,7 +195,8 @@ cat("\n[5/7] Testing differential methylation at cytosine level...\n")
 diff_meth_cytosine <- function(meth_obj, context_name, q = 0.01, diff = 25) {
 
   myDiff <- calculateDiffMeth(meth_obj,
-    mc.cores   = max(1, parallel::detectCores() - 1),
+    mc.cores   = 1L,   # serial: mclapply forking deadlocks on SIGPIPE with many
+                       # workers (e.g. 31 on a 32-core host); Chr4 data is small
     test       = "F",
     overdispersion = "MN"
   )
@@ -242,7 +243,7 @@ tile_analysis <- function(myobj_raw, context_name, q = 0.05, diff = 20) {
   meth_tiles <- unite(tiles, destrand = FALSE)
 
   myDiff_tiles <- calculateDiffMeth(meth_tiles,
-    mc.cores = max(1, parallel::detectCores() - 1),
+    mc.cores = 1L,     # serial (see note above): avoids the mclapply SIGPIPE hang
     test     = "F",
     overdispersion = "MN"
   )
