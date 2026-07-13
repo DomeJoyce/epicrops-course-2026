@@ -515,9 +515,13 @@ clusterSamples(meth, dist = "correlation", method = "ward", plot = TRUE)
 
 ### 5.5 Calculate differential methylation
 
+> We use `mc.cores = 1` (serial). methylKit's parallel backend (`mclapply`) can
+> **deadlock** on some Docker setups — worse on many-core machines — so serial is the
+> reliable choice; on this Chr4-sized data it is plenty fast.
+
 ```r
 myDiff <- calculateDiffMeth(meth,
-  mc.cores       = 4,
+  mc.cores       = 1,
   test           = "F",
   overdispersion = "MN"    # matches the automated day2_methylkit.R
 )
@@ -558,7 +562,7 @@ plot(myDiff, chromosome = "Chr4",
 tiles      <- tileMethylCounts(myobj, win.size = 200, step.size = 200, cov.bases = 1)
 meth_tiles <- unite(tiles, destrand = FALSE)
 
-myDiff_tiles <- calculateDiffMeth(meth_tiles, mc.cores = 4, test = "F", overdispersion = "MN")
+myDiff_tiles <- calculateDiffMeth(meth_tiles, mc.cores = 1, test = "F", overdispersion = "MN")
 
 DMRs <- getMethylDiff(myDiff_tiles,
   difference = 20,
@@ -600,7 +604,7 @@ myobj_CHG <- methRead(file_list,
 )
 meth_CHG <- unite(filterByCoverage(myobj_CHG, lo.count = 3, hi.perc = 99.9),
   destrand = FALSE)
-myDiff_CHG <- calculateDiffMeth(meth_CHG, mc.cores = 4, test = "F", overdispersion = "MN")
+myDiff_CHG <- calculateDiffMeth(meth_CHG, mc.cores = 1, test = "F", overdispersion = "MN")
 DMC_CHG <- getMethylDiff(myDiff_CHG, 25, 0.01, "all")
 
 # And CHH
@@ -614,7 +618,7 @@ myobj_CHH <- methRead(file_list,
 )
 meth_CHH <- unite(filterByCoverage(myobj_CHH, lo.count = 3, hi.perc = 99.9),
   destrand = FALSE)
-myDiff_CHH <- calculateDiffMeth(meth_CHH, mc.cores = 4, test = "F", overdispersion = "MN")
+myDiff_CHH <- calculateDiffMeth(meth_CHH, mc.cores = 1, test = "F", overdispersion = "MN")
 DMC_CHH <- getMethylDiff(myDiff_CHH, 25, 0.01, "all")
 
 # Summary bar plot
