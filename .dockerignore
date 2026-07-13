@@ -1,0 +1,10 @@
+results/
+data/raw/
+data/reference/
+notebooks/
+*.tar.gz
+*.gz
+.git/
+__pycache__/
+*.pyc
+.DS_Store

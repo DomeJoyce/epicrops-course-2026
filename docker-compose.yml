@@ -1,0 +1,115 @@
+# =============================================================================
+# docker-compose.yml – "The Epi-Code" Practical Course
+# Florence Training School, 14–17 July 2026
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # DAY 1 – lncRNA / mRNA differential expression
+  # Self-contained image: all tools + the 6 Chr4 RNA-seq libraries + reference
+  # are already inside it (nothing to download). JupyterLab on :8888.
+  # Usage: docker compose up day1          -> open http://localhost:8888
+  #        docker compose run --rm day1 bash   (pure command line)
+  # Walkthrough: exercises/Day1_lncRNA_mRNA_Pipeline.md
+  # ---------------------------------------------------------------------------
+  day1:
+    image: leogiuffre/lncrna-mnps-workshop:1.0
+    container_name: epi_code_day1
+    hostname: epi-code-day1
+    stdin_open: true
+    tty: true
+    ports:
+      - "8888:8888"
+    # Trimmomatic (old Java) crashes under the image's OpenJDK 22 C2 JIT compiler
+    # (SIGSEGV in FastqParser.next once the method gets hot). Disabling the C2
+    # tier fixes it with no measurable slowdown on this data.
+    environment:
+      - JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1
+    # Persist Day 1 results on the host (works out of the box on Docker Desktop).
+    volumes:
+      - ./results/day1_lncRNA:/home/student/results
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+          memory: "6G"
+
+  # ---------------------------------------------------------------------------
+  # Main course environment (interactive terminal) — Day 2 (WGBS / methylation)
+  # Usage: docker compose run --rm course
+  # ---------------------------------------------------------------------------
+  course:
+    image: epi-code-practical:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: epi_code_course
+    hostname: epi-code
+    stdin_open: true
+    tty: true
+
+    # Mount local working directory into container so data + results persist
+    volumes:
+      - ./data:/course/data                   # raw FASTQ + reference indices (persist)
+      - ./results:/course/results             # analysis results (persist)
+      - ./scripts:/course/scripts             # scripts (editable live)
+      - ./exercises:/course/exercises         # exercise files
+
+    # Resource limits – tuned for laptops (8 GB RAM, 4 cores)
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+          memory: "6G"
+        reservations:
+          memory: "2G"
+
+    environment:
+      - COURSE_DIR=/course
+      - DATA_DIR=/course/data
+      - REF_DIR=/course/data/reference
+      - RESULTS_DIR=/course/results
+      - SCRIPTS_DIR=/course/scripts
+
+    command: /bin/bash
+
+  # ---------------------------------------------------------------------------
+  # Jupyter Notebook server (optional – for interactive R/Python exploration)
+  # Usage: docker compose up jupyter
+  # Access: http://localhost:8888
+  # ---------------------------------------------------------------------------
+  jupyter:
+    image: epi-code-practical:latest
+    container_name: epi_code_jupyter
+    hostname: epi-code-jupyter
+    ports:
+      - "8888:8888"
+
+    volumes:
+      - ./data:/course/data
+      - ./results:/course/results
+      - ./scripts:/course/scripts
+      - ./exercises:/course/exercises
+      - ./notebooks:/course/notebooks
+
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+          memory: "6G"
+
+    environment:
+      - COURSE_DIR=/course
+      - DATA_DIR=/course/data
+      - REF_DIR=/course/data/reference
+      - RESULTS_DIR=/course/results
+
+    command: >
+      jupyter notebook
+        --ip=0.0.0.0
+        --port=8888
+        --no-browser
+        --allow-root
+        --notebook-dir=/course
+        --NotebookApp.token=epicode2026
