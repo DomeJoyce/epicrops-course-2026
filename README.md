@@ -65,12 +65,13 @@ Results land in `results/day1_lncRNA/` on your laptop (~1.5 GB; whole run ≈ 8�
 
 Day 2 uses a course image built from this repository.
 
-**1. Get the image** — build it (works everywhere, ~20–40 min the first time):
+**1. Get the image** — pull the pre-built image (fast, recommended):
 ```bash
-docker compose build course
+docker pull djoyce86/epi-code-practical:2026
+docker tag djoyce86/epi-code-practical:2026 epi-code-practical:latest
 ```
-> *Faster option, if your instructors announce a Docker Hub name:*
-> `docker pull <namespace>/epi-code-practical:2026 && docker tag <namespace>/epi-code-practical:2026 epi-code-practical:latest`
+> *No internet at the venue, or you prefer building it yourself? It also works from
+> source (~20–40 min the first time):* `docker compose build course`
 
 **2. One-time setup + data (inside the container):**
 ```bash

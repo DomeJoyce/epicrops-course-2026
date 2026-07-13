@@ -55,10 +55,10 @@ When you see a JupyterLab URL / `http://localhost:8888`, it works — stop it wi
 
 ## 4. Get the Day 2 image (WGBS)
 
-**Build it from the repository** (works on every machine; ~20–40 min the first time — let
-it run):
+**Pull the pre-built image** (fast — a few minutes):
 ```bash
-docker compose build course
+docker pull djoyce86/epi-code-practical:2026
+docker tag djoyce86/epi-code-practical:2026 epi-code-practical:latest
 ```
 Then check the tools are present:
 ```bash
@@ -66,8 +66,8 @@ docker compose run --rm course bash -lc 'bash $SCRIPTS_DIR/validate_env.sh'
 ```
 It should finish with **`ALL GOOD — environment is ready.`**
 
-> *If the instructors announce a Docker Hub image name, you can pull instead of build:*
-> `docker pull <namespace>/epi-code-practical:2026 && docker tag <namespace>/epi-code-practical:2026 epi-code-practical:latest`
+> *No internet at the venue, or prefer building it yourself? It also works from source
+> (~20–40 min the first time):* `docker compose build course`
 
 ---
 
