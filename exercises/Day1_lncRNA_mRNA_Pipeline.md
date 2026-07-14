@@ -66,6 +66,7 @@ On your **host machine** (a normal terminal, *not* inside a container):
 
 ```bash
 docker pull leogiuffre/lncrna-mnps-workshop:1.0
+
 docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 \
   leogiuffre/lncrna-mnps-workshop:1.0
 ```
@@ -115,16 +116,23 @@ them together only when a step genuinely needs all six.
 
 ```bash
 hisat2 --version | head -1
+
 stringtie --version
+
 CPC2 --help 2>&1 | head -1
+
 featureCounts -v 2>&1 | tr -d '\n'; echo
+
 Rscript -e 'cat(R.version.string); suppressMessages(library(edgeR)); cat(" | edgeR", as.character(packageVersion("edgeR")), "\n")'
 ```
 
 ```bash
 column -t /home/student/data/reads/samples.tsv        # the 6 samples and their conditions
+
 ls -lh /home/student/data/reads/*.fastq.gz            # the paired FASTQ (R1/R2)
+
 samtools faidx /home/student/reference/chr4.fa
+
 cat /home/student/reference/chr4.fa.fai               # Chromosome 4 length
 ```
 
@@ -252,6 +260,7 @@ hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
   --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
   --new-summary --summary-file /home/student/results/03_align/control_1.hisat2.summary 2>/dev/null \
   | samtools sort -@ 4 -o /home/student/results/03_align/control_1.sorted.bam -
+
 samtools index /home/student/results/03_align/control_1.sorted.bam
 ```
 
@@ -262,6 +271,7 @@ hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
   --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
   --new-summary --summary-file /home/student/results/03_align/control_2.hisat2.summary 2>/dev/null \
   | samtools sort -@ 4 -o /home/student/results/03_align/control_2.sorted.bam -
+
 samtools index /home/student/results/03_align/control_2.sorted.bam
 ```
 
@@ -272,6 +282,7 @@ hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
   --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
   --new-summary --summary-file /home/student/results/03_align/control_3.hisat2.summary 2>/dev/null \
   | samtools sort -@ 4 -o /home/student/results/03_align/control_3.sorted.bam -
+
 samtools index /home/student/results/03_align/control_3.sorted.bam
 ```
 
@@ -282,6 +293,7 @@ hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
   --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
   --new-summary --summary-file /home/student/results/03_align/trpet_1.hisat2.summary 2>/dev/null \
   | samtools sort -@ 4 -o /home/student/results/03_align/trpet_1.sorted.bam -
+
 samtools index /home/student/results/03_align/trpet_1.sorted.bam
 ```
 
@@ -292,6 +304,7 @@ hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
   --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
   --new-summary --summary-file /home/student/results/03_align/trpet_2.hisat2.summary 2>/dev/null \
   | samtools sort -@ 4 -o /home/student/results/03_align/trpet_2.sorted.bam -
+
 samtools index /home/student/results/03_align/trpet_2.sorted.bam
 ```
 
@@ -302,6 +315,7 @@ hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
   --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
   --new-summary --summary-file /home/student/results/03_align/trpet_3.hisat2.summary 2>/dev/null \
   | samtools sort -@ 4 -o /home/student/results/03_align/trpet_3.sorted.bam -
+
 samtools index /home/student/results/03_align/trpet_3.sorted.bam
 ```
 
@@ -309,6 +323,7 @@ When all six are done, read the alignment rates and inspect one BAM:
 
 ```bash
 grep 'Overall alignment rate' /home/student/results/03_align/*.hisat2.summary
+
 samtools flagstat /home/student/results/03_align/control_1.sorted.bam
 ```
 
@@ -378,6 +393,7 @@ stringtie --merge -p 4 -G /home/student/reference/chr4.gtf \
   /home/student/results/04_assembly/trpet_3.gtf
 
 echo "merged transcripts: $(grep -c $'\ttranscript\t' /home/student/results/04_assembly/merged.gtf)"
+
 echo "known transcripts : $(grep -c $'\ttranscript\t' /home/student/reference/chr4.gtf)"
 ```
 
@@ -399,6 +415,7 @@ gffcompare -r /home/student/reference/chr4.gtf -o /home/student/results/05_novel
   /home/student/results/04_assembly/merged.gtf
 
 echo "== class-code distribution =="
+
 grep $'\ttranscript\t' /home/student/results/05_novel/gffcmp.annotated.gtf \
   | grep -oE 'class_code "."' | sort | uniq -c | sort -rn
 ```
@@ -411,6 +428,7 @@ python3 /home/student/workshop/lib/gtf_select.py /home/student/results/05_novel/
   --out-gtf /home/student/results/05_novel/candidates.gtf --out-tsv /home/student/results/05_novel/candidates.tsv
 
 gffread -w /home/student/results/05_novel/candidates.fa -g /home/student/reference/chr4.fa /home/student/results/05_novel/candidates.gtf
+
 echo "candidate novel transcripts: $(( $(wc -l < /home/student/results/05_novel/candidates.tsv) - 1 ))"
 ```
 
@@ -421,7 +439,9 @@ potential with **CPC2** and keep the **non-coding** transcripts:
 CPC2 -i /home/student/results/05_novel/candidates.fa -o /home/student/results/06_lncrna/cpc2 >/dev/null
 
 awk -F'\t' 'NR>1{print $1"\t"$NF}' /home/student/results/06_lncrna/cpc2.txt > /home/student/results/06_lncrna/cpc2.labels.tsv
+
 awk -F'\t' '$2=="noncoding"{print $1}' /home/student/results/06_lncrna/cpc2.labels.tsv > /home/student/results/06_lncrna/lncRNA.ids.txt
+
 echo "noncoding (lncRNA): $(wc -l < /home/student/results/06_lncrna/lncRNA.ids.txt)   coding: $(grep -c coding /home/student/results/06_lncrna/cpc2.labels.tsv)"
 
 grep -F -w -f /home/student/results/06_lncrna/lncRNA.ids.txt /home/student/results/05_novel/candidates.gtf > /home/student/results/06_lncrna/novel_lncRNA.gtf
@@ -436,6 +456,7 @@ python3 /home/student/workshop/lib/build_augmented.py \
   --out-gtf /home/student/results/06_lncrna/augmented.gtf --out-tsv /home/student/results/06_lncrna/gene_biotype.tsv
 
 echo "== gene classes in augmented annotation =="
+
 tail -n +2 /home/student/results/06_lncrna/gene_biotype.tsv | cut -f3 | sort | uniq -c
 ```
 
@@ -471,6 +492,7 @@ featureCounts -T 4 -p --countReadPairs -s 2 \
 sed -i '2s#[^\t]*/##g; 2s#\.sorted\.bam##g' /home/student/results/07_quant/counts.txt
 
 column -t /home/student/results/07_quant/counts.txt.summary
+
 grep -v '^#' /home/student/results/07_quant/counts.txt | cut -f1,7- | grep '^MSTRG' | head -5 | column -t
 ```
 
@@ -649,6 +671,7 @@ with StringTie `-e -B` and test with Ballgown:
 ```bash
 # back at the shell (leave R first with quit(save="no"))
 bash /home/student/workshop/scripts/11_ballgown.sh
+
 Rscript /home/student/workshop/scripts/11_ballgown.R
 ```
 

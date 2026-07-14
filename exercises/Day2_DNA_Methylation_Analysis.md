@@ -59,8 +59,11 @@ Verify tools are available:
 
 ```bash
 bismark --version
+
 trim_galore --version
+
 samtools --version
+
 R --version
 ```
 
@@ -74,6 +77,7 @@ WGBS reads are paired-end. Look at R1 and R2 of one sample:
 
 ```bash
 seqtk seq -A /course/data/raw/wgbs/SRR13650161_1.fastq.gz | head -8
+
 seqtk seq -A /course/data/raw/wgbs/SRR13650161_2.fastq.gz | head -8
 ```
 
@@ -345,6 +349,7 @@ bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --C
     --genome_folder /course/data/reference/indices/bismark --parallel 4 \
     --output_dir /course/results/day2_methylation/04_methylation \
     /course/results/day2_methylation/03_bismark_aligned/SRR13650161_pe.deduplicated.bam
+
 mv /course/results/day2_methylation/04_methylation/SRR13650161_pe.deduplicated.CX_report.txt \
    /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
 ```
@@ -355,6 +360,7 @@ bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --C
     --genome_folder /course/data/reference/indices/bismark --parallel 4 \
     --output_dir /course/results/day2_methylation/04_methylation \
     /course/results/day2_methylation/03_bismark_aligned/SRR13650163_pe.deduplicated.bam
+
 mv /course/results/day2_methylation/04_methylation/SRR13650163_pe.deduplicated.CX_report.txt \
    /course/results/day2_methylation/04_methylation/SRR13650163.CX_report.txt
 ```
@@ -365,6 +371,7 @@ bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --C
     --genome_folder /course/data/reference/indices/bismark --parallel 4 \
     --output_dir /course/results/day2_methylation/04_methylation \
     /course/results/day2_methylation/03_bismark_aligned/SRR13650165_pe.deduplicated.bam
+
 mv /course/results/day2_methylation/04_methylation/SRR13650165_pe.deduplicated.CX_report.txt \
    /course/results/day2_methylation/04_methylation/SRR13650165.CX_report.txt
 ```
@@ -375,6 +382,7 @@ bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --C
     --genome_folder /course/data/reference/indices/bismark --parallel 4 \
     --output_dir /course/results/day2_methylation/04_methylation \
     /course/results/day2_methylation/03_bismark_aligned/SRR13650194_pe.deduplicated.bam
+
 mv /course/results/day2_methylation/04_methylation/SRR13650194_pe.deduplicated.CX_report.txt \
    /course/results/day2_methylation/04_methylation/SRR13650194.CX_report.txt
 ```
@@ -385,6 +393,7 @@ bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --C
     --genome_folder /course/data/reference/indices/bismark --parallel 4 \
     --output_dir /course/results/day2_methylation/04_methylation \
     /course/results/day2_methylation/03_bismark_aligned/SRR13650196_pe.deduplicated.bam
+
 mv /course/results/day2_methylation/04_methylation/SRR13650196_pe.deduplicated.CX_report.txt \
    /course/results/day2_methylation/04_methylation/SRR13650196.CX_report.txt
 ```
@@ -395,6 +404,7 @@ bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --C
     --genome_folder /course/data/reference/indices/bismark --parallel 4 \
     --output_dir /course/results/day2_methylation/04_methylation \
     /course/results/day2_methylation/03_bismark_aligned/SRR13650198_pe.deduplicated.bam
+
 mv /course/results/day2_methylation/04_methylation/SRR13650198_pe.deduplicated.CX_report.txt \
    /course/results/day2_methylation/04_methylation/SRR13650198.CX_report.txt
 ```
@@ -418,6 +428,7 @@ awk 'NR>1 {print $6}' \
 ```bash
 # Calculate mean CpG methylation
 awk '$6 == "CG" && ($4+$5) > 0 {sum += $4/($4+$5); n++}
+
      END {printf "Mean CpG methylation: %.2f%%\n", sum/n*100}' \
     /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
 ```
