@@ -12,7 +12,7 @@ pipeline finishes in minutes.
 | **1** | Identify **novel lncRNAs** and find genes that change expression under micro-nanoplastic stress (RNA-seq → HISAT2 → StringTie → CPC2 → edgeR) | control vs **Tr-PET** (3+3) | [exercises/Day1_lncRNA_mRNA_Pipeline.md](exercises/Day1_lncRNA_mRNA_Pipeline.md) |
 | **2** | Map **DNA methylation** and find regions that change under salt stress (WGBS → Bismark → methylKit) | control vs **salt** (3+3) | [exercises/Day2_DNA_Methylation_Analysis.md](exercises/Day2_DNA_Methylation_Analysis.md) |
 
-**First time working on a terminal?** Read [BASH_tutorial.md] (BASH_tutorial.md) — it explains 
+**First time working on a terminal?** Read [BASH_tutorial.md](BASH_tutorial.md) — it explains 
 *the basic bash command commonly used on a linux terminal*, so you are able to do the basic command into your machine.
 
 **New to the commands?** Read [COMMANDS_EXPLAINED.md](COMMANDS_EXPLAINED.md) — it explains
