@@ -40,12 +40,7 @@ The reference is ***A. thaliana* TAIR10, Chromosome 4** (~18 Mb, Araport11 annot
 and the reads have been subsampled to Chr4, so the whole pipeline runs in minutes on a
 laptop.
 
-> **Why "strand-specific" matters.** A stranded library records which DNA strand each
-> transcript came from. This is essential for lncRNAs, because a lncRNA is frequently
-> transcribed **antisense** to a protein-coding gene at the *same* locus — only
-> strandedness lets us tell the two apart. Throughout today we tell every tool the
-> library is **reverse-stranded** (dUTP): HISAT2 `--rna-strandness RF`, StringTie `--rf`,
-> featureCounts `-s 2`.
+**Why "strand-specific" matters.** A stranded library records which DNA strand each transcript came from. This is essential for lncRNAs, because a lncRNA is frequently transcribed **antisense** to a protein-coding gene at the *same* locus — only  strandedness lets us tell the two apart. Throughout today we tell every tool the library is **reverse-stranded** (dUTP): HISAT2 `--rna-strandness RF`, StringTie `--rf`, featureCounts `-s 2`.
 
 | RNA class            | Typical length | Role                                                  |
 |----------------------|----------------|-------------------------------------------------------|
@@ -71,13 +66,10 @@ docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 \
   leogiuffre/lncrna-mnps-workshop:1.0
 ```
 
-> **Why `-e JAVA_TOOL_OPTIONS=…`?** Trimmomatic (Part 2) is an old Java program and
-> crashes under this image's newer Java compiler; the flag disables the faulty
-> compiler tier (no measurable slowdown). Keep it on every `docker run` today.
-> Easier still: from the repo folder run **`docker compose up day1`** — the fix is
-> already baked into `docker-compose.yml`.
->
-> **Apple-Silicon Macs (M1/M2/M3):** add `--platform linux/amd64` to the commands.
+**Why `-e JAVA_TOOL_OPTIONS=…`?** Trimmomatic (Part 2) is an old Java program and crashes under this image's newer Java compiler; the flag disables the faulty compiler tier (no measurable slowdown). Keep it on every `docker run` today.
+Easier still: from the repo folder run **`docker compose up day1`** — the fix is already baked into `docker-compose.yml`.
+
+**Apple-Silicon Macs (M1/M2/M3):** add `--platform linux/amd64` to the commands.
 
 Open **http://localhost:8888** in your browser. This is JupyterLab. We will **type the
 commands ourselves in a terminal**, so open one:
@@ -87,10 +79,10 @@ commands ourselves in a terminal**, so open one:
 Everything you produce lands under `results/` in the JupyterLab file browser on the left
 — open PNGs and tables by double-clicking them.
 
-> Prefer the command line only? On the host run
-> `docker run --rm -it -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 leogiuffre/lncrna-mnps-workshop:1.0 bash` instead.
-> Prefer a fully guided click-through? The same steps are in the ready-made notebooks
-> under `workshop/notebooks/` (run them top to bottom).
+Prefer the command line only? On the host run
+`docker run --rm -it -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 leogiuffre/lncrna-mnps-workshop:1.0 bash` instead.
+
+Prefer a fully guided click-through? The same steps are in the ready-made notebooks under `workshop/notebooks/` (run them top to bottom).
 
 ### 0.1 Create the output folders
 
@@ -133,13 +125,16 @@ ls -lh /home/student/data/reads/*.fastq.gz            # the paired FASTQ (R1/R2)
 
 samtools faidx /home/student/reference/chr4.fa
 
-cat /home/student/reference/chr4.fa.fai               # Chromosome 4 length
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
+  -1 /home/student/results/02_trim/control_1_R1.paired.fq.gz -2 /home/student/results/02_trim/control_1_R2.paired.fq.gz \
+  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
+  --new-summary --summary-file /home/student/results/03_align/control_1.hisat2.summary 2>/dev/null \
+  | samtools sort -@ 4 -o /home/student/results/03_align/control_1.sorted.bam -cat /home/student/reference/chr4.fa.fai               # Chromosome 4 length
 ```
 
-> **Question 1.** How many read pairs are in one library (hint: `zcat /home/student/data/reads/control_1_R1.fastq.gz | wc -l` then divide by 4)? In one sentence, why can we not discover *antisense* lncRNAs from an *unstranded* library?
+**Question 1.** How many read pairs are in one library (hint: `zcat /home/student/data/reads/control_1_R1.fastq.gz | wc -l` then divide by 4)? In one sentence, why can we not discover *antisense* lncRNAs from an *unstranded* library?
 
-> **Laptop note.** Every command below uses **4** CPU threads. On a small laptop, change
-> each `4` to `2` (i.e. `-threads 2`, `-p 2`, `-T 2`).
+**Laptop note.** Every command below uses **4** CPU threads. On a small laptop, change each `4` to `2` (i.e. `-threads 2`, `-p 2`, `-T 2`).
 
 ---
 
@@ -162,9 +157,7 @@ multiqc -f -o /home/student/results/01_qc /home/student/results/01_qc
 
 Open `results/01_qc/multiqc_report.html` in the JupyterLab file browser.
 
-> **Question 2.** Look at "Per base sequence quality" and "Adapter Content". Is there a
-> 3′ quality drop? Which adapter is flagged? Why is some sequence duplication *expected*
-> and not alarming in RNA-seq?
+**Question 2.** Look at "Per base sequence quality" and "Adapter Content". Is there a 3′ quality drop? Which adapter is flagged? Why is some sequence duplication *expected* and not alarming in RNA-seq?
 
 ---
 
@@ -238,9 +231,7 @@ trimmomatic PE -threads 4 -phred33 \
   ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
   SLIDINGWINDOW:4:18 MINLEN:40
 ```
-
-> **Question 3.** What fraction of read pairs survived trimming? Is it consistent across
-> samples? Why do we keep only the **paired** output for a paired-end aligner?
+**Question 3.** What fraction of read pairs survived trimming? Is it consistent across samples? Why do we keep only the **paired** output for a paired-end aligner?
 
 ---
 
@@ -327,8 +318,7 @@ grep 'Overall alignment rate' /home/student/results/03_align/*.hisat2.summary
 samtools flagstat /home/student/results/03_align/control_1.sorted.bam
 ```
 
-> **Question 4.** What is the overall alignment rate (these libraries are Chr4-enriched,
-> so it is high)? What does `--dta` change, and why does StringTie need it?
+**Question 4.** What is the overall alignment rate (these libraries are Chr4-enriched, so it is high)? What does `--dta` change, and why does StringTie need it?
 
 ---
 
@@ -397,9 +387,7 @@ echo "merged transcripts: $(grep -c $'\ttranscript\t' /home/student/results/04_a
 echo "known transcripts : $(grep -c $'\ttranscript\t' /home/student/reference/chr4.gtf)"
 ```
 
-> **Question 5.** Does the merged assembly contain **more** transcripts than the
-> annotation? Where do the extra ones come from? What would happen to novel-transcript
-> discovery if we ran StringTie **without** `-G`?
+**Question 5.** Does the merged assembly contain **more** transcripts than the annotation? Where do the extra ones come from? What would happen to novel-transcript discovery if we ran StringTie **without** `-G`?
 
 ---
 
@@ -447,7 +435,7 @@ echo "noncoding (lncRNA): $(wc -l < /home/student/results/06_lncrna/lncRNA.ids.t
 grep -F -w -f /home/student/results/06_lncrna/lncRNA.ids.txt /home/student/results/05_novel/candidates.gtf > /home/student/results/06_lncrna/novel_lncRNA.gtf
 ```
 
-Finally build the **augmented annotation** (known genes + novel lncRNAs) and a table
+Finally, build the **augmented annotation** (known genes + novel lncRNAs) and a table
 labelling every gene as `mRNA` / `lncRNA` / `other`:
 
 ```bash
@@ -460,10 +448,7 @@ echo "== gene classes in augmented annotation =="
 tail -n +2 /home/student/results/06_lncrna/gene_biotype.tsv | cut -f3 | sort | uniq -c
 ```
 
-> **Question 6.** Which class code dominates your candidates — intergenic (`u`),
-> intronic (`i`) or antisense (`x`)? What fraction of candidates did CPC2 call *coding*
-> and discard? Why is a coding-potential filter necessary — aren't unannotated
-> transcripts non-coding by definition?
+**Question 6.** Which class code dominates your candidates — intergenic (`u`), intronic (`i`) or antisense (`x`)? What fraction of candidates did CPC2 call *coding* and discard? Why is a coding-potential filter necessary — aren't unannotated transcripts non-coding by definition?
 
 ---
 
@@ -496,9 +481,7 @@ column -t /home/student/results/07_quant/counts.txt.summary
 grep -v '^#' /home/student/results/07_quant/counts.txt | cut -f1,7- | grep '^MSTRG' | head -5 | column -t
 ```
 
-> **Question 7.** What percentage of fragments were **assigned**? Do the novel lncRNAs
-> (`MSTRG.*`) carry non-trivial counts? (They must, or the differential test will filter
-> them out.)
+**Question 7.** What percentage of fragments were **assigned**? Do the novel lncRNAs (`MSTRG.*`) carry non-trivial counts? (They must, or the differential test will filter them out.)
 
 ---
 
@@ -553,8 +536,7 @@ sig <- res[res$significant, ]
 addmargins(table(rna_class = sig$rna_class, direction = sig$direction))
 ```
 
-> **Question 8.** How many **lncRNAs** and how many **mRNAs** are differentially
-> expressed, and in which direction? Why filter lowly-expressed genes *before* testing?
+**Question 8.** How many **lncRNAs** and how many **mRNAs** are differentially expressed, and in which direction? Why filter lowly-expressed genes *before* testing?
 
 ---
 
@@ -601,8 +583,7 @@ if (length(top) >= 2) {
 
 Open `results/09_figures/*.png` in the file browser.
 
-> **Question 9.** Do control and Tr-PET separate on **PC1**? On the volcano, are lncRNAs
-> (purple) over-represented among the strongly regulated genes?
+**Question 9.** Do control and Tr-PET separate on **PC1**? On the volcano, are lncRNAs (purple) over-represented among the strongly regulated genes?
 
 ---
 
@@ -656,10 +637,7 @@ if (!is.null(ego) && nrow(as.data.frame(ego))>0) {
 
 Type `quit(save = "no")` to leave R.
 
-> **Question 10.** How many DE lncRNAs have a protein-coding neighbour within 10 kb?
-> Which GO biological processes surface — do any relate to stress, transport or
-> cell-wall responses? This is a *positional* prediction: what experiment would *test*
-> that a lncRNA truly regulates its neighbour?
+**Question 10.** How many DE lncRNAs have a protein-coding neighbour within 10 kb? Which GO biological processes surface — do any relate to stress, transport or cell-wall responses? This is a *positional* prediction: what experiment would *test* that a lncRNA truly regulates its neighbour?
 
 ---
 
