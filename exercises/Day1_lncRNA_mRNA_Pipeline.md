@@ -591,11 +591,18 @@ bash /home/student/workshop/scripts/run_all.sh --with-ballgown
 
 Your tables and figures are under `results/` (visible in the JupyterLab file browser).
 To keep them after the container stops, download the `results/` folder from the file
-browser, running 
+browser. To get it, just run in a terminal tab:
 
 ```bash
 cd /home/student && tar czf day1_results.tar.gz results/
 ```
+then refresh + download. Do this before you close/stop the container — once it stops, everything inside it is gone.
+
+In your JupyterLab browser tab, click the refresh icon at the top of the file browser (left sidebar).
+You'll see a new file at the top level: day1_results.tar.gz.
+Right-click it → Download. It saves to your normal Downloads folder.
+Locally, extract it: tar xzf day1_results.tar.gz → gives you back the results/ folder.
+If you ever need to redo this yourself (e.g. after running more steps), 
 
 or re-run with a bind-mount:
 
