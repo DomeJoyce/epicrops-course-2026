@@ -591,7 +591,13 @@ bash /home/student/workshop/scripts/run_all.sh --with-ballgown
 
 Your tables and figures are under `results/` (visible in the JupyterLab file browser).
 To keep them after the container stops, download the `results/` folder from the file
-browser, or re-run with a bind-mount:
+browser, running 
+
+```bash
+cd /home/student && tar czf day1_results.tar.gz results/
+```
+
+or re-run with a bind-mount:
 
 ```bash
 docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -e SHELL=/bin/bash -v "$PWD/day1_results":/home/student/results leogiuffre/lncrna-mnps-workshop:1.0
