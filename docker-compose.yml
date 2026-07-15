@@ -110,6 +110,9 @@ services:
       - DATA_DIR=/course/data
       - REF_DIR=/course/data/reference
       - RESULTS_DIR=/course/results
+      # Without this, the Jupyter server has no $SHELL set, so its Terminal
+      # falls back to /bin/sh (dash): no arrow-key history, no Tab completion.
+      - SHELL=/bin/bash
 
     command: >
       jupyter notebook

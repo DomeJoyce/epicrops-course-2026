@@ -47,9 +47,45 @@ natural reference point when we discuss the 24 nt hc-siRNA → CHH-methylation l
 
 ---
 
+## Part 0 – Start the Day 2 environment
+
+Unlike Day 1, the Day 2 image has no browser UI bundled — you type commands in a plain
+terminal attached to the container. You have two equivalent ways to do that; pick whichever
+you're more comfortable with, both run the exact same commands inside the exact same
+container:
+
+**Option A — plain terminal (default, works everywhere: bash, zsh, or Windows PowerShell):**
+
+```bash
+docker compose run --rm course
+```
+
+This drops you straight into a shell inside the container. Every command in this
+walkthrough goes here.
+
+**Option B — JupyterLab-style browser terminal (optional, same experience as Day 1):**
+
+```bash
+docker compose up jupyter
+```
+
+Then open **http://localhost:8888/?token=epicode2026** in your browser, and use
+**File → New → Terminal** — a terminal opens inside the container, and you type the exact
+same commands there as in Option A.
+
+Either way, results write to `results/day2_methylation/` **on your laptop** automatically
+(bind-mounted) — unlike Day 1's self-contained image, there is no manual export step here.
+
+> **Laptop note.** Commands below use **4** CPU threads. On a small laptop, change each `4`
+> to `2`.
+
+---
+
 ## Part 1 – Quality Control of Bisulfite-Seq Data
 
 ### 1.1 Start the Docker container
+
+(Already done in Part 0 — skip if you're continuing in the same terminal.)
 
 ```bash
 docker compose run --rm course
