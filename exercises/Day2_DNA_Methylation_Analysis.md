@@ -54,10 +54,9 @@ natural reference point when we discuss the 24 nt hc-siRNA → CHH-methylation l
 
 ## Part 0 – Start the Day 2 environment
 
-Unlike Day 1, the Day 2 image has no browser UI bundled — you type commands in a plain
-terminal attached to the container. You have two equivalent ways to do that; pick whichever
-you're more comfortable with, both run the exact same commands inside the exact same
-container:
+You type the Day 2 commands into a terminal attached to the container. You have two
+equivalent ways to open that terminal; pick whichever you prefer — both run the exact same
+commands inside the exact same container:
 
 **Option A — plain terminal (default, works everywhere: bash, zsh, or Windows PowerShell):**
 
@@ -68,15 +67,22 @@ docker compose run --rm course
 This drops you straight into a shell inside the container. Every command in this
 walkthrough goes here.
 
-**Option B — JupyterLab-style browser terminal (optional, same experience as Day 1):**
+**Option B — JupyterLab in the browser (the same environment as Day 1):**
+
+> **First stop Day 1 if it is still running** — both days use port 8888, so Day 2 cannot
+> start while Day 1 holds it. Press **Ctrl-C** in Day 1's terminal, or run:
+>
+> ```bash
+> docker rm -f epi_code_day1
+> ```
 
 ```bash
-docker compose up jupyter
+docker compose up day2
 ```
 
-Then open **http://localhost:8888/?token=epicode2026** in your browser, and use
-**File → New → Terminal** — a terminal opens inside the container, and you type the exact
-same commands there as in Option A.
+Then open **http://localhost:8888/** in your browser (no token needed, exactly like Day 1),
+and use **File → New → Terminal** — a terminal opens inside the container, and you type the
+exact same commands there as in Option A.
 
 Either way, results write to `results/day2_methylation/` **on your laptop** automatically
 (bind-mounted) — unlike Day 1's self-contained image, there is no manual export step here.

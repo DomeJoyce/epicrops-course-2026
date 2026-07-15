@@ -81,14 +81,19 @@ services:
     command: /bin/bash
 
   # ---------------------------------------------------------------------------
-  # Jupyter Notebook server (optional – for interactive R/Python exploration)
-  # Usage: docker compose up jupyter
-  # Access: http://localhost:8888
+  # DAY 2 – WGBS / methylation, JupyterLab (same experience as Day 1)
+  # JupyterLab on :8888, no token (open http://localhost:8888 directly), then use
+  # File -> New -> Terminal and run the Day 2 commands by hand.
+  # Usage: docker compose up day2       (STOP Day 1 first: docker rm -f epi_code_day1)
+  # Walkthrough: exercises/Day2_DNA_Methylation_Analysis.md
+  # (For a plain terminal instead, use the 'course' service above.)
   # ---------------------------------------------------------------------------
-  jupyter:
+  day2:
     image: epi-code-practical:latest
-    container_name: epi_code_jupyter
-    hostname: epi-code-jupyter
+    container_name: epi_code_day2
+    hostname: epi-code-day2
+    stdin_open: true
+    tty: true
     ports:
       - "8888:8888"
 
@@ -114,11 +119,14 @@ services:
       # falls back to /bin/sh (dash): no arrow-key history, no Tab completion.
       - SHELL=/bin/bash
 
+    # JupyterLab with the same flags Day 1's image uses (empty token/password ->
+    # plain http://localhost:8888 URL, identical to Day 1).
     command: >
-      jupyter notebook
+      jupyter lab
         --ip=0.0.0.0
         --port=8888
         --no-browser
         --allow-root
-        --notebook-dir=/course
-        --NotebookApp.token=epicode2026
+        --ServerApp.root_dir=/course
+        --ServerApp.token=
+        --ServerApp.password=
