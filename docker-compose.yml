@@ -123,14 +123,19 @@ services:
       # falls back to /bin/sh (dash): no arrow-key history, no Tab completion.
       - SHELL=/bin/bash
 
-    # JupyterLab with the same flags Day 1's image uses (empty token/password ->
-    # plain http://localhost:8888 URL, identical to Day 1).
-    command: >
-      jupyter lab
-        --ip=0.0.0.0
-        --port=8888
-        --no-browser
-        --allow-root
-        --ServerApp.root_dir=/course
-        --ServerApp.token=
-        --ServerApp.password=
+    # JupyterLab, same experience as Day 1: empty token/password -> plain URL.
+    # terminado_settings forces the browser Terminal to spawn a LOGIN bash
+    # (/bin/bash -l) exactly like Day 1 — without it this image's terminal
+    # falls back to a plain shell with no arrow-key history / Tab completion.
+    # List form (not a folded string) so the JSON arg is passed intact.
+    command:
+      - jupyter
+      - lab
+      - --ip=0.0.0.0
+      - --port=8888
+      - --no-browser
+      - --allow-root
+      - --ServerApp.root_dir=/course
+      - --ServerApp.token=
+      - --ServerApp.password=
+      - '--ServerApp.terminado_settings={"shell_command": ["/bin/bash", "-l"]}'
