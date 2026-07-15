@@ -24,8 +24,14 @@ services:
     # Trimmomatic (old Java) crashes under the image's OpenJDK 22 C2 JIT compiler
     # (SIGSEGV in FastqParser.next once the method gets hot). Disabling the C2
     # tier fixes it with no measurable slowdown on this data.
+    #
+    # SHELL=/bin/bash: the Jupyter server process has no $SHELL set by default,
+    # so JupyterLab's terminal (terminado) falls back to /bin/sh (dash) — no
+    # arrow-key history, no Tab completion, no `history` builtin. Setting SHELL
+    # makes every new terminal tab spawn a real bash shell instead.
     environment:
       - JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1
+      - SHELL=/bin/bash
     # Persist Day 1 results on the host (works out of the box on Docker Desktop).
     volumes:
       - ./results/day1_lncRNA:/home/student/results

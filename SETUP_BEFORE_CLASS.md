@@ -51,6 +51,10 @@ docker compose up day1
 ```
 When you see a JupyterLab URL / `http://localhost:8888`, it works — stop it with Ctrl-C.
 
+> **Tip:** always start Day 1 with `docker compose up day1` (not a raw `docker run`
+> without the extra flags) — it sets two fixes the walkthrough depends on. If a terminal
+> ever shows `history: not found` or arrow keys/Tab don't work, type `exec bash` in it.
+
 ---
 
 ## 4. Get the Day 2 image (WGBS)

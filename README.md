@@ -51,9 +51,11 @@ docker compose up day1        # then open http://localhost:8888  (JupyterLab)
 In JupyterLab: **File → New → Terminal**, and type the commands from the
 [Day 1 walkthrough](exercises/Day1_lncRNA_mRNA_Pipeline.md).
 
-> The compose file already sets the `JAVA_TOOL_OPTIONS` fix that keeps Trimmomatic from
-> crashing — so prefer `docker compose up day1`. If you launch the image with a raw
-> `docker run`, add `-e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1` (the walkthrough shows
+> The compose file already sets two fixes: `JAVA_TOOL_OPTIONS` (keeps Trimmomatic from
+> crashing) and `SHELL=/bin/bash` (keeps the JupyterLab terminal from defaulting to a
+> shell with no arrow-key history or Tab completion) — so prefer `docker compose up day1`.
+> If you launch the image with a raw `docker run`, add
+> `-e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -e SHELL=/bin/bash` (the walkthrough shows
 > this). Apple-Silicon Macs: also add `--platform linux/amd64`.
 
 **Or run the whole pipeline in one go (no typing):**
@@ -110,6 +112,7 @@ Open the `.png`/`.html` files by double-clicking them (JupyterLab file browser o
 | Symptom | Fix |
 |---------|-----|
 | Day 1 Trimmomatic prints "A fatal error … Java Runtime" | Use `docker compose up day1`, or add `-e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1` to your `docker run`. |
+| Day 1 terminal: no arrow-key history, no Tab completion, `history: not found` | You're in `dash`, not `bash` (JupyterLab's terminal has no `$SHELL` set by default). Immediate fix in an open terminal: type `exec bash`. Permanent fix: use `docker compose up day1` (already sets `SHELL=/bin/bash`), or add `-e SHELL=/bin/bash` to your `docker run`. |
 | `no space left on device` | Free disk; you need ~20 GB. `docker system prune` reclaims space. |
 | Day 2 tool "not found" | Run `bash $SCRIPTS_DIR/validate_env.sh` — it should end with "ALL GOOD". |
 | `bowtie2 … Failed to launch x86-64-v3 version` | Harmless — it falls back automatically. |

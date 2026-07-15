@@ -62,11 +62,14 @@ On your **host machine** (a normal terminal, *not* inside a container):
 ```bash
 docker pull leogiuffre/lncrna-mnps-workshop:1.0
 
-docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 leogiuffre/lncrna-mnps-workshop:1.0
+docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -e SHELL=/bin/bash leogiuffre/lncrna-mnps-workshop:1.0
 ```
 
 **Why `-e JAVA_TOOL_OPTIONS=…`?** Trimmomatic (Part 2) is an old Java program and crashes under this image's newer Java compiler; the flag disables the faulty compiler tier (no measurable slowdown). Keep it on every `docker run` today.
-Easier still: from the repo folder run **`docker compose up day1`** — the fix is already baked into `docker-compose.yml`.
+
+**Why `-e SHELL=/bin/bash`?** Without it, JupyterLab's terminal defaults to `/bin/sh` (dash) — no arrow-key history, no Tab completion, no `history` builtin. This flag makes every terminal tab you open a real bash shell. (If a terminal is already open and stuck in dash, just type `exec bash` in it — no restart needed.)
+
+Easier still: from the repo folder run **`docker compose up day1`** — both fixes are already baked into `docker-compose.yml`.
 
 **Apple-Silicon Macs (M1/M2/M3):** add `--platform linux/amd64` to the commands.
 
@@ -591,7 +594,7 @@ To keep them after the container stops, download the `results/` folder from the 
 browser, or re-run with a bind-mount:
 
 ```bash
-docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -v "$PWD/day1_results":/home/student/results leogiuffre/lncrna-mnps-workshop:1.0
+docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -e SHELL=/bin/bash -v "$PWD/day1_results":/home/student/results leogiuffre/lncrna-mnps-workshop:1.0
 ```
 
 Tomorrow (Day 2) we decode the **methylome** of the same organism with Whole-Genome
