@@ -11,6 +11,9 @@ results/**
 # Precomputed fallbacks are distributed via Docker Hub / release assets, not git
 precomputed/
 
+# Instructor-only handoff notes (never publish to the student repo)
+HANDOFF.md
+
 # Cruft
 *.tar.gz
 *.bam
