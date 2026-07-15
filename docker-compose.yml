@@ -82,11 +82,15 @@ services:
 
   # ---------------------------------------------------------------------------
   # DAY 2 – WGBS / methylation, JupyterLab (same experience as Day 1)
-  # JupyterLab on :8888, no token (open http://localhost:8888 directly), then use
-  # File -> New -> Terminal and run the Day 2 commands by hand.
-  # Usage: docker compose up day2       (STOP Day 1 first: docker rm -f epi_code_day1)
+  # JupyterLab on :8889 (Day 1 uses :8888, so both days can run at the same time),
+  # no token: open http://localhost:8889 directly, then File -> New -> Terminal and
+  # run the Day 2 commands by hand.
+  # Usage: docker compose up day2
   # Walkthrough: exercises/Day2_DNA_Methylation_Analysis.md
   # (For a plain terminal instead, use the 'course' service above.)
+  # NOTE: the host port (8889) is only the browser URL; it has NOTHING to do with
+  # how the two days share data — that happens through the ./results host folder
+  # this service bind-mounts below.
   # ---------------------------------------------------------------------------
   day2:
     image: epi-code-practical:latest
@@ -95,7 +99,7 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "8888:8888"
+      - "8889:8888"
 
     volumes:
       - ./data:/course/data

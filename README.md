@@ -86,8 +86,8 @@ bash $SCRIPTS_DIR/00_setup_reference.sh 4   # build Chr4 indices (~1 min here; a
 bash $DATA_DIR/download_data.sh          # download + subsample the 6 WGBS libraries
 ```
 > *Prefer the browser, like Day 1?* Run **`docker compose up day2`** instead and open
-> **http://localhost:8888/** → *File → New → Terminal*, then run the same commands there.
-> (Stop Day 1 first — both use port 8888: `docker rm -f epi_code_day1`.)
+> **http://localhost:8889/** → *File → New → Terminal*, then run the same commands there.
+> (Day 2 uses port 8889 so it can run side by side with Day 1's 8888.)
 
 **3. Run the analysis** — follow the
 [Day 2 walkthrough](exercises/Day2_DNA_Methylation_Analysis.md) step by step, **or** run it

@@ -69,20 +69,14 @@ walkthrough goes here.
 
 **Option B — JupyterLab in the browser (the same environment as Day 1):**
 
-> **First stop Day 1 if it is still running** — both days use port 8888, so Day 2 cannot
-> start while Day 1 holds it. Press **Ctrl-C** in Day 1's terminal, or run:
->
-> ```bash
-> docker rm -f epi_code_day1
-> ```
-
 ```bash
 docker compose up day2
 ```
 
-Then open **http://localhost:8888/** in your browser (no token needed, exactly like Day 1),
-and use **File → New → Terminal** — a terminal opens inside the container, and you type the
-exact same commands there as in Option A.
+Then open **http://localhost:8889/** in your browser (no token needed, like Day 1 — just a
+different port so **both days can stay open side by side**), and use
+**File → New → Terminal** — a terminal opens inside the container, and you type the exact
+same commands there as in Option A.
 
 Either way, results write to `results/day2_methylation/` **on your laptop** automatically
 (bind-mounted) — unlike Day 1's self-contained image, there is no manual export step here.
@@ -628,9 +622,28 @@ whether these two regulatory marks tend to sit in the **same places** on the gen
 > single joint differential test. It still teaches the mechanics of integrating two
 > omics layers.
 
-Day 1 wrote the coordinates of its DE lncRNAs to `10_cis/de_lnc.bed`. That file is visible
-here as `/course/results/day1_lncRNA/10_cis/de_lnc.bed`, because both days share the same
-`./results` folder on your host machine.
+Day 1 wrote the coordinates of its DE lncRNAs to `10_cis/de_lnc.bed`. Day 2 reads it from
+`/course/results/day1_lncRNA/10_cis/de_lnc.bed`.
+
+> **The two days share data through a folder, not a network port.** It does **not** matter
+> that Day 1's JupyterLab is on `:8888` and Day 2's is on `:8889` — the port is only the
+> browser URL. What the two days share is the **`results/` folder on your laptop**, which
+> both containers bind-mount. Day 2 just needs Day 1's output sitting in
+> `results/day1_lncRNA/` on the host.
+
+> **Prerequisite — put Day 1's results where Day 2 can see them.**
+> - If you ran Day 1 with **`docker compose up day1`**, it already saved to
+>   `results/day1_lncRNA/` — nothing to do.
+> - If you ran Day 1 in its own container and **downloaded `day1_results.tar.gz`** (the
+>   End-of-Day-1 step), unpack it into `results/day1_lncRNA/` once. From a terminal in the
+>   **Day 2** environment (the tarball must be somewhere under `/course`, e.g. drag it into
+>   the JupyterLab file browser first):
+>
+>   ```bash
+>   mkdir -p /course/results/day1_lncRNA
+>   tar xzf /course/day1_results.tar.gz -C /course/results/day1_lncRNA --strip-components=1
+>   ls /course/results/day1_lncRNA/10_cis/de_lnc.bed   # should print the path — you're set
+>   ```
 
 > **One catch — chromosome names.** Day 1's reference calls the chromosome `4`, while
 > Day 2's calls it `Chr4`. If we compare them as-is, every overlap silently returns zero —
