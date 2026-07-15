@@ -29,9 +29,14 @@ By the end of Day 2 you will be able to:
 | CHG     | CHG      | CMT3                          | TE silencing, repetitive elements        |
 | CHH     | CHH      | DRM2 (RdDM pathway) / CMT2   | RdDM, stress-responsive de novo meth.   |
 
-The **RdDM pathway** connects small-RNA biology with epigenomics: 24 nt hc-siRNAs guide
-DRM2 to silence transposable elements via CHH methylation. It is the mechanistic bridge to
-Day 1, where we studied a different regulatory-RNA layer — the long non-coding RNAs.
+**Long non-coding RNAs and DNA methylation are directly linked**: many lncRNAs act *in
+cis*, recruiting chromatin- and DNA-methylation machinery to neighbouring loci, or are
+themselves transcribed antisense to a differentially methylated region — exactly the
+cis-regulatory relationship you tested for Day 1's DE lncRNAs. Small-RNA-guided
+methylation (**RdDM**) is a second, well-established route to the same molecular outcome:
+24 nt hc-siRNAs guide the methyltransferase DRM2 to silence transposable elements via CHH
+methylation. Part 6 today tests the lncRNA↔methylation link directly, using the real DE
+lncRNA coordinates produced on Day 1.
 
 **Whole-Genome Bisulfite Sequencing (WGBS)** is the gold-standard method for
 single-base resolution methylome profiling. Sodium bisulfite converts unmethylated
@@ -597,7 +602,9 @@ ggplot(summary_df, aes(x = Context, y = DMCs, fill = Context)) +
 > **Question 9:** In which cytosine context do you observe the most DMCs?
 > Given the role of RdDM (24 nt hc-siRNAs → DRM2 → CHH methylation), propose a
 > mechanistic model linking small-RNA changes to altered CHH methylation under salt
-> stress.
+> stress. Separately — and this is the link Part 6 tests directly — could a *cis*-acting
+> lncRNA, rather than a small RNA, recruit the same methylation machinery to a
+> neighbouring locus instead? What evidence would distinguish the two mechanisms?
 
 ---
 
