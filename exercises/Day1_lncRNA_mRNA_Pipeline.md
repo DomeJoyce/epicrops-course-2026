@@ -62,8 +62,7 @@ On your **host machine** (a normal terminal, *not* inside a container):
 ```bash
 docker pull leogiuffre/lncrna-mnps-workshop:1.0
 
-docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 \
-  leogiuffre/lncrna-mnps-workshop:1.0
+docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 leogiuffre/lncrna-mnps-workshop:1.0
 ```
 
 **Why `-e JAVA_TOOL_OPTIONS=…`?** Trimmomatic (Part 2) is an old Java program and crashes under this image's newer Java compiler; the flag disables the faulty compiler tier (no measurable slowdown). Keep it on every `docker run` today.
@@ -92,12 +91,7 @@ with a single plain command (there is **no configuration file to source**, and w
 type every path in full so nothing is hidden):
 
 ```bash
-mkdir -p /home/student/results/01_qc /home/student/results/02_trim \
-         /home/student/results/03_align /home/student/results/04_assembly \
-         /home/student/results/05_novel /home/student/results/06_lncrna \
-         /home/student/results/07_quant /home/student/results/08_de \
-         /home/student/results/09_figures /home/student/results/10_cis \
-         /home/student/results/11_ballgown
+mkdir -p /home/student/results/01_qc /home/student/results/02_trim /home/student/results/03_align /home/student/results/04_assembly /home/student/results/05_novel /home/student/results/06_lncrna /home/student/results/07_quant /home/student/results/08_de /home/student/results/09_figures /home/student/results/10_cis /home/student/results/11_ballgown
 ```
 
 Our **6 libraries** are `control_1 control_2 control_3` (control) and
@@ -125,11 +119,7 @@ ls -lh /home/student/data/reads/*.fastq.gz            # the paired FASTQ (R1/R2)
 
 samtools faidx /home/student/reference/chr4.fa
 
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/control_1_R1.paired.fq.gz -2 /home/student/results/02_trim/control_1_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/control_1.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/control_1.sorted.bam -cat /home/student/reference/chr4.fa.fai               # Chromosome 4 length
+cat /home/student/reference/chr4.fa.fai               # Chromosome 4 length
 ```
 
 **Question 1.** How many read pairs are in one library (hint: `zcat /home/student/data/reads/control_1_R1.fastq.gz | wc -l` then divide by 4)? In one sentence, why can we not discover *antisense* lncRNAs from an *unstranded* library?
@@ -144,13 +134,7 @@ Run FastQC on all 12 FASTQ files (R1 + R2 of the 6 samples), then summarise them
 MultiQC:
 
 ```bash
-fastqc -t 4 -o /home/student/results/01_qc \
-  /home/student/data/reads/control_1_R1.fastq.gz /home/student/data/reads/control_1_R2.fastq.gz \
-  /home/student/data/reads/control_2_R1.fastq.gz /home/student/data/reads/control_2_R2.fastq.gz \
-  /home/student/data/reads/control_3_R1.fastq.gz /home/student/data/reads/control_3_R2.fastq.gz \
-  /home/student/data/reads/trpet_1_R1.fastq.gz /home/student/data/reads/trpet_1_R2.fastq.gz \
-  /home/student/data/reads/trpet_2_R1.fastq.gz /home/student/data/reads/trpet_2_R2.fastq.gz \
-  /home/student/data/reads/trpet_3_R1.fastq.gz /home/student/data/reads/trpet_3_R2.fastq.gz
+fastqc -t 4 -o /home/student/results/01_qc /home/student/data/reads/control_1_R1.fastq.gz /home/student/data/reads/control_1_R2.fastq.gz /home/student/data/reads/control_2_R1.fastq.gz /home/student/data/reads/control_2_R2.fastq.gz /home/student/data/reads/control_3_R1.fastq.gz /home/student/data/reads/control_3_R2.fastq.gz /home/student/data/reads/trpet_1_R1.fastq.gz /home/student/data/reads/trpet_1_R2.fastq.gz /home/student/data/reads/trpet_2_R1.fastq.gz /home/student/data/reads/trpet_2_R2.fastq.gz /home/student/data/reads/trpet_3_R1.fastq.gz /home/student/data/reads/trpet_3_R2.fastq.gz
 
 multiqc -f -o /home/student/results/01_qc /home/student/results/01_qc
 ```
@@ -174,62 +158,32 @@ after each run (that is the number you need for Question 3).
 
 ```bash
 # --- control_1 ---
-trimmomatic PE -threads 4 -phred33 \
-  /home/student/data/reads/control_1_R1.fastq.gz /home/student/data/reads/control_1_R2.fastq.gz \
-  /home/student/results/02_trim/control_1_R1.paired.fq.gz /home/student/results/02_trim/control_1_R1.unpaired.fq.gz \
-  /home/student/results/02_trim/control_1_R2.paired.fq.gz /home/student/results/02_trim/control_1_R2.unpaired.fq.gz \
-  ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
-  SLIDINGWINDOW:4:18 MINLEN:40
+trimmomatic PE -threads 4 -phred33 /home/student/data/reads/control_1_R1.fastq.gz /home/student/data/reads/control_1_R2.fastq.gz /home/student/results/02_trim/control_1_R1.paired.fq.gz /home/student/results/02_trim/control_1_R1.unpaired.fq.gz /home/student/results/02_trim/control_1_R2.paired.fq.gz /home/student/results/02_trim/control_1_R2.unpaired.fq.gz ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:18 MINLEN:40
 ```
 
 ```bash
 # --- control_2 ---
-trimmomatic PE -threads 4 -phred33 \
-  /home/student/data/reads/control_2_R1.fastq.gz /home/student/data/reads/control_2_R2.fastq.gz \
-  /home/student/results/02_trim/control_2_R1.paired.fq.gz /home/student/results/02_trim/control_2_R1.unpaired.fq.gz \
-  /home/student/results/02_trim/control_2_R2.paired.fq.gz /home/student/results/02_trim/control_2_R2.unpaired.fq.gz \
-  ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
-  SLIDINGWINDOW:4:18 MINLEN:40
+trimmomatic PE -threads 4 -phred33 /home/student/data/reads/control_2_R1.fastq.gz /home/student/data/reads/control_2_R2.fastq.gz /home/student/results/02_trim/control_2_R1.paired.fq.gz /home/student/results/02_trim/control_2_R1.unpaired.fq.gz /home/student/results/02_trim/control_2_R2.paired.fq.gz /home/student/results/02_trim/control_2_R2.unpaired.fq.gz ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:18 MINLEN:40
 ```
 
 ```bash
 # --- control_3 ---
-trimmomatic PE -threads 4 -phred33 \
-  /home/student/data/reads/control_3_R1.fastq.gz /home/student/data/reads/control_3_R2.fastq.gz \
-  /home/student/results/02_trim/control_3_R1.paired.fq.gz /home/student/results/02_trim/control_3_R1.unpaired.fq.gz \
-  /home/student/results/02_trim/control_3_R2.paired.fq.gz /home/student/results/02_trim/control_3_R2.unpaired.fq.gz \
-  ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
-  SLIDINGWINDOW:4:18 MINLEN:40
+trimmomatic PE -threads 4 -phred33 /home/student/data/reads/control_3_R1.fastq.gz /home/student/data/reads/control_3_R2.fastq.gz /home/student/results/02_trim/control_3_R1.paired.fq.gz /home/student/results/02_trim/control_3_R1.unpaired.fq.gz /home/student/results/02_trim/control_3_R2.paired.fq.gz /home/student/results/02_trim/control_3_R2.unpaired.fq.gz ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:18 MINLEN:40
 ```
 
 ```bash
 # --- trpet_1 ---
-trimmomatic PE -threads 4 -phred33 \
-  /home/student/data/reads/trpet_1_R1.fastq.gz /home/student/data/reads/trpet_1_R2.fastq.gz \
-  /home/student/results/02_trim/trpet_1_R1.paired.fq.gz /home/student/results/02_trim/trpet_1_R1.unpaired.fq.gz \
-  /home/student/results/02_trim/trpet_1_R2.paired.fq.gz /home/student/results/02_trim/trpet_1_R2.unpaired.fq.gz \
-  ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
-  SLIDINGWINDOW:4:18 MINLEN:40
+trimmomatic PE -threads 4 -phred33 /home/student/data/reads/trpet_1_R1.fastq.gz /home/student/data/reads/trpet_1_R2.fastq.gz /home/student/results/02_trim/trpet_1_R1.paired.fq.gz /home/student/results/02_trim/trpet_1_R1.unpaired.fq.gz /home/student/results/02_trim/trpet_1_R2.paired.fq.gz /home/student/results/02_trim/trpet_1_R2.unpaired.fq.gz ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:18 MINLEN:40
 ```
 
 ```bash
 # --- trpet_2 ---
-trimmomatic PE -threads 4 -phred33 \
-  /home/student/data/reads/trpet_2_R1.fastq.gz /home/student/data/reads/trpet_2_R2.fastq.gz \
-  /home/student/results/02_trim/trpet_2_R1.paired.fq.gz /home/student/results/02_trim/trpet_2_R1.unpaired.fq.gz \
-  /home/student/results/02_trim/trpet_2_R2.paired.fq.gz /home/student/results/02_trim/trpet_2_R2.unpaired.fq.gz \
-  ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
-  SLIDINGWINDOW:4:18 MINLEN:40
+trimmomatic PE -threads 4 -phred33 /home/student/data/reads/trpet_2_R1.fastq.gz /home/student/data/reads/trpet_2_R2.fastq.gz /home/student/results/02_trim/trpet_2_R1.paired.fq.gz /home/student/results/02_trim/trpet_2_R1.unpaired.fq.gz /home/student/results/02_trim/trpet_2_R2.paired.fq.gz /home/student/results/02_trim/trpet_2_R2.unpaired.fq.gz ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:18 MINLEN:40
 ```
 
 ```bash
 # --- trpet_3 ---
-trimmomatic PE -threads 4 -phred33 \
-  /home/student/data/reads/trpet_3_R1.fastq.gz /home/student/data/reads/trpet_3_R2.fastq.gz \
-  /home/student/results/02_trim/trpet_3_R1.paired.fq.gz /home/student/results/02_trim/trpet_3_R1.unpaired.fq.gz \
-  /home/student/results/02_trim/trpet_3_R2.paired.fq.gz /home/student/results/02_trim/trpet_3_R2.unpaired.fq.gz \
-  ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 \
-  SLIDINGWINDOW:4:18 MINLEN:40
+trimmomatic PE -threads 4 -phred33 /home/student/data/reads/trpet_3_R1.fastq.gz /home/student/data/reads/trpet_3_R2.fastq.gz /home/student/results/02_trim/trpet_3_R1.paired.fq.gz /home/student/results/02_trim/trpet_3_R1.unpaired.fq.gz /home/student/results/02_trim/trpet_3_R2.paired.fq.gz /home/student/results/02_trim/trpet_3_R2.unpaired.fq.gz ILLUMINACLIP:/home/student/reference/adapters.fa:2:30:10 HEADCROP:1 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:18 MINLEN:40
 ```
 **Question 3.** What fraction of read pairs survived trimming? Is it consistent across samples? Why do we keep only the **paired** output for a paired-end aligner?
 
@@ -246,66 +200,42 @@ to make a sorted BAM, then indexes it. HISAT2 writes a small alignment summary n
 
 ```bash
 # --- control_1 ---
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/control_1_R1.paired.fq.gz -2 /home/student/results/02_trim/control_1_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/control_1.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/control_1.sorted.bam -
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 -1 /home/student/results/02_trim/control_1_R1.paired.fq.gz -2 /home/student/results/02_trim/control_1_R2.paired.fq.gz --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt --new-summary --summary-file /home/student/results/03_align/control_1.hisat2.summary 2>/dev/null | samtools sort -@ 4 -o /home/student/results/03_align/control_1.sorted.bam -
 
 samtools index /home/student/results/03_align/control_1.sorted.bam
 ```
 
 ```bash
 # --- control_2 ---
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/control_2_R1.paired.fq.gz -2 /home/student/results/02_trim/control_2_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/control_2.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/control_2.sorted.bam -
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 -1 /home/student/results/02_trim/control_2_R1.paired.fq.gz -2 /home/student/results/02_trim/control_2_R2.paired.fq.gz --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt --new-summary --summary-file /home/student/results/03_align/control_2.hisat2.summary 2>/dev/null | samtools sort -@ 4 -o /home/student/results/03_align/control_2.sorted.bam -
 
 samtools index /home/student/results/03_align/control_2.sorted.bam
 ```
 
 ```bash
 # --- control_3 ---
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/control_3_R1.paired.fq.gz -2 /home/student/results/02_trim/control_3_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/control_3.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/control_3.sorted.bam -
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 -1 /home/student/results/02_trim/control_3_R1.paired.fq.gz -2 /home/student/results/02_trim/control_3_R2.paired.fq.gz --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt --new-summary --summary-file /home/student/results/03_align/control_3.hisat2.summary 2>/dev/null | samtools sort -@ 4 -o /home/student/results/03_align/control_3.sorted.bam -
 
 samtools index /home/student/results/03_align/control_3.sorted.bam
 ```
 
 ```bash
 # --- trpet_1 ---
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/trpet_1_R1.paired.fq.gz -2 /home/student/results/02_trim/trpet_1_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/trpet_1.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/trpet_1.sorted.bam -
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 -1 /home/student/results/02_trim/trpet_1_R1.paired.fq.gz -2 /home/student/results/02_trim/trpet_1_R2.paired.fq.gz --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt --new-summary --summary-file /home/student/results/03_align/trpet_1.hisat2.summary 2>/dev/null | samtools sort -@ 4 -o /home/student/results/03_align/trpet_1.sorted.bam -
 
 samtools index /home/student/results/03_align/trpet_1.sorted.bam
 ```
 
 ```bash
 # --- trpet_2 ---
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/trpet_2_R1.paired.fq.gz -2 /home/student/results/02_trim/trpet_2_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/trpet_2.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/trpet_2.sorted.bam -
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 -1 /home/student/results/02_trim/trpet_2_R1.paired.fq.gz -2 /home/student/results/02_trim/trpet_2_R2.paired.fq.gz --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt --new-summary --summary-file /home/student/results/03_align/trpet_2.hisat2.summary 2>/dev/null | samtools sort -@ 4 -o /home/student/results/03_align/trpet_2.sorted.bam -
 
 samtools index /home/student/results/03_align/trpet_2.sorted.bam
 ```
 
 ```bash
 # --- trpet_3 ---
-hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 \
-  -1 /home/student/results/02_trim/trpet_3_R1.paired.fq.gz -2 /home/student/results/02_trim/trpet_3_R2.paired.fq.gz \
-  --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt \
-  --new-summary --summary-file /home/student/results/03_align/trpet_3.hisat2.summary 2>/dev/null \
-  | samtools sort -@ 4 -o /home/student/results/03_align/trpet_3.sorted.bam -
+hisat2 -p 4 -x /home/student/reference/hisat2_index/chr4 -1 /home/student/results/02_trim/trpet_3_R1.paired.fq.gz -2 /home/student/results/02_trim/trpet_3_R2.paired.fq.gz --rna-strandness RF --dta --known-splicesite-infile /home/student/reference/chr4.ss.txt --new-summary --summary-file /home/student/results/03_align/trpet_3.hisat2.summary 2>/dev/null | samtools sort -@ 4 -o /home/student/results/03_align/trpet_3.sorted.bam -
 
 samtools index /home/student/results/03_align/trpet_3.sorted.bam
 ```
@@ -334,38 +264,32 @@ transcript name prefix):
 
 ```bash
 # --- control_1 ---
-stringtie /home/student/results/03_align/control_1.sorted.bam --rf -p 4 \
-  -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/control_1.gtf -l control_1
+stringtie /home/student/results/03_align/control_1.sorted.bam --rf -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/control_1.gtf -l control_1
 ```
 
 ```bash
 # --- control_2 ---
-stringtie /home/student/results/03_align/control_2.sorted.bam --rf -p 4 \
-  -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/control_2.gtf -l control_2
+stringtie /home/student/results/03_align/control_2.sorted.bam --rf -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/control_2.gtf -l control_2
 ```
 
 ```bash
 # --- control_3 ---
-stringtie /home/student/results/03_align/control_3.sorted.bam --rf -p 4 \
-  -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/control_3.gtf -l control_3
+stringtie /home/student/results/03_align/control_3.sorted.bam --rf -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/control_3.gtf -l control_3
 ```
 
 ```bash
 # --- trpet_1 ---
-stringtie /home/student/results/03_align/trpet_1.sorted.bam --rf -p 4 \
-  -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/trpet_1.gtf -l trpet_1
+stringtie /home/student/results/03_align/trpet_1.sorted.bam --rf -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/trpet_1.gtf -l trpet_1
 ```
 
 ```bash
 # --- trpet_2 ---
-stringtie /home/student/results/03_align/trpet_2.sorted.bam --rf -p 4 \
-  -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/trpet_2.gtf -l trpet_2
+stringtie /home/student/results/03_align/trpet_2.sorted.bam --rf -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/trpet_2.gtf -l trpet_2
 ```
 
 ```bash
 # --- trpet_3 ---
-stringtie /home/student/results/03_align/trpet_3.sorted.bam --rf -p 4 \
-  -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/trpet_3.gtf -l trpet_3
+stringtie /home/student/results/03_align/trpet_3.sorted.bam --rf -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/trpet_3.gtf -l trpet_3
 ```
 
 **Now the first "bring everyone together" step:** merge the six per-sample assemblies into
@@ -373,14 +297,7 @@ one non-redundant transcriptome, so all samples are quantified against the same 
 simply list the six GTFs after `--merge`:
 
 ```bash
-stringtie --merge -p 4 -G /home/student/reference/chr4.gtf \
-  -o /home/student/results/04_assembly/merged.gtf \
-  /home/student/results/04_assembly/control_1.gtf \
-  /home/student/results/04_assembly/control_2.gtf \
-  /home/student/results/04_assembly/control_3.gtf \
-  /home/student/results/04_assembly/trpet_1.gtf \
-  /home/student/results/04_assembly/trpet_2.gtf \
-  /home/student/results/04_assembly/trpet_3.gtf
+stringtie --merge -p 4 -G /home/student/reference/chr4.gtf -o /home/student/results/04_assembly/merged.gtf /home/student/results/04_assembly/control_1.gtf /home/student/results/04_assembly/control_2.gtf /home/student/results/04_assembly/control_3.gtf /home/student/results/04_assembly/trpet_1.gtf /home/student/results/04_assembly/trpet_2.gtf /home/student/results/04_assembly/trpet_3.gtf
 
 echo "merged transcripts: $(grep -c $'\ttranscript\t' /home/student/results/04_assembly/merged.gtf)"
 
@@ -399,21 +316,17 @@ gene on the same strand: **`u`** (intergenic), **`i`** (intronic), **`x`** (anti
 and require length **≥ 200 nt**.
 
 ```bash
-gffcompare -r /home/student/reference/chr4.gtf -o /home/student/results/05_novel/gffcmp \
-  /home/student/results/04_assembly/merged.gtf
+gffcompare -r /home/student/reference/chr4.gtf -o /home/student/results/05_novel/gffcmp /home/student/results/04_assembly/merged.gtf
 
 echo "== class-code distribution =="
 
-grep $'\ttranscript\t' /home/student/results/05_novel/gffcmp.annotated.gtf \
-  | grep -oE 'class_code "."' | sort | uniq -c | sort -rn
+grep $'\ttranscript\t' /home/student/results/05_novel/gffcmp.annotated.gtf | grep -oE 'class_code "."' | sort | uniq -c | sort -rn
 ```
 
 Select the candidates (helper script) and extract their spliced sequences:
 
 ```bash
-python3 /home/student/workshop/lib/gtf_select.py /home/student/results/05_novel/gffcmp.annotated.gtf \
-  --classes u,i,x --min-len 200 \
-  --out-gtf /home/student/results/05_novel/candidates.gtf --out-tsv /home/student/results/05_novel/candidates.tsv
+python3 /home/student/workshop/lib/gtf_select.py /home/student/results/05_novel/gffcmp.annotated.gtf --classes u,i,x --min-len 200 --out-gtf /home/student/results/05_novel/candidates.gtf --out-tsv /home/student/results/05_novel/candidates.tsv
 
 gffread -w /home/student/results/05_novel/candidates.fa -g /home/student/reference/chr4.fa /home/student/results/05_novel/candidates.gtf
 
@@ -439,9 +352,7 @@ Finally, build the **augmented annotation** (known genes + novel lncRNAs) and a 
 labelling every gene as `mRNA` / `lncRNA` / `other`:
 
 ```bash
-python3 /home/student/workshop/lib/build_augmented.py \
-  --ref-gtf /home/student/reference/chr4.gtf --lnc-gtf /home/student/results/06_lncrna/novel_lncRNA.gtf \
-  --out-gtf /home/student/results/06_lncrna/augmented.gtf --out-tsv /home/student/results/06_lncrna/gene_biotype.tsv
+python3 /home/student/workshop/lib/build_augmented.py --ref-gtf /home/student/reference/chr4.gtf --lnc-gtf /home/student/results/06_lncrna/novel_lncRNA.gtf --out-gtf /home/student/results/06_lncrna/augmented.gtf --out-tsv /home/student/results/06_lncrna/gene_biotype.tsv
 
 echo "== gene classes in augmented annotation =="
 
@@ -463,15 +374,7 @@ takes **all six sorted BAMs at once** and produces a single table with six count
 (`-s 2` = reverse-stranded counting):
 
 ```bash
-featureCounts -T 4 -p --countReadPairs -s 2 \
-  -t exon -g gene_id -a /home/student/results/06_lncrna/augmented.gtf \
-  -o /home/student/results/07_quant/counts.txt \
-  /home/student/results/03_align/control_1.sorted.bam \
-  /home/student/results/03_align/control_2.sorted.bam \
-  /home/student/results/03_align/control_3.sorted.bam \
-  /home/student/results/03_align/trpet_1.sorted.bam \
-  /home/student/results/03_align/trpet_2.sorted.bam \
-  /home/student/results/03_align/trpet_3.sorted.bam
+featureCounts -T 4 -p --countReadPairs -s 2 -t exon -g gene_id -a /home/student/results/06_lncrna/augmented.gtf -o /home/student/results/07_quant/counts.txt /home/student/results/03_align/control_1.sorted.bam /home/student/results/03_align/control_2.sorted.bam /home/student/results/03_align/control_3.sorted.bam /home/student/results/03_align/trpet_1.sorted.bam /home/student/results/03_align/trpet_2.sorted.bam /home/student/results/03_align/trpet_3.sorted.bam
 
 # tidy the column names (strip paths and .sorted.bam)
 sed -i '2s#[^\t]*/##g; 2s#\.sorted\.bam##g' /home/student/results/07_quant/counts.txt
@@ -688,9 +591,7 @@ To keep them after the container stops, download the `results/` folder from the 
 browser, or re-run with a bind-mount:
 
 ```bash
-docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 \
-  -v "$PWD/day1_results":/home/student/results \
-  leogiuffre/lncrna-mnps-workshop:1.0
+docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -v "$PWD/day1_results":/home/student/results leogiuffre/lncrna-mnps-workshop:1.0
 ```
 
 Tomorrow (Day 2) we decode the **methylome** of the same organism with Whole-Genome

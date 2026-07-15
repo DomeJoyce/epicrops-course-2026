@@ -90,26 +90,15 @@ seqtk seq -A /course/data/raw/wgbs/SRR13650161_2.fastq.gz | head -8
 First create the output folders once (a single plain command — nothing is hidden):
 
 ```bash
-mkdir -p /course/results/day2_methylation/01_qc /course/results/day2_methylation/02_trimmed \
-         /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/04_methylation \
-         /course/results/day2_methylation/05_diffmeth
+mkdir -p /course/results/day2_methylation/01_qc /course/results/day2_methylation/02_trimmed /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/04_methylation /course/results/day2_methylation/05_diffmeth
 ```
 
 Run FastQC on all 12 FASTQ files (R1 + R2 of the 6 samples), then summarise with MultiQC:
 
 ```bash
-fastqc --threads 4 \
-    --outdir /course/results/day2_methylation/01_qc \
-    /course/data/raw/wgbs/SRR13650161_1.fastq.gz /course/data/raw/wgbs/SRR13650161_2.fastq.gz \
-    /course/data/raw/wgbs/SRR13650163_1.fastq.gz /course/data/raw/wgbs/SRR13650163_2.fastq.gz \
-    /course/data/raw/wgbs/SRR13650165_1.fastq.gz /course/data/raw/wgbs/SRR13650165_2.fastq.gz \
-    /course/data/raw/wgbs/SRR13650194_1.fastq.gz /course/data/raw/wgbs/SRR13650194_2.fastq.gz \
-    /course/data/raw/wgbs/SRR13650196_1.fastq.gz /course/data/raw/wgbs/SRR13650196_2.fastq.gz \
-    /course/data/raw/wgbs/SRR13650198_1.fastq.gz /course/data/raw/wgbs/SRR13650198_2.fastq.gz
+fastqc --threads 4 --outdir /course/results/day2_methylation/01_qc /course/data/raw/wgbs/SRR13650161_1.fastq.gz /course/data/raw/wgbs/SRR13650161_2.fastq.gz /course/data/raw/wgbs/SRR13650163_1.fastq.gz /course/data/raw/wgbs/SRR13650163_2.fastq.gz /course/data/raw/wgbs/SRR13650165_1.fastq.gz /course/data/raw/wgbs/SRR13650165_2.fastq.gz /course/data/raw/wgbs/SRR13650194_1.fastq.gz /course/data/raw/wgbs/SRR13650194_2.fastq.gz /course/data/raw/wgbs/SRR13650196_1.fastq.gz /course/data/raw/wgbs/SRR13650196_2.fastq.gz /course/data/raw/wgbs/SRR13650198_1.fastq.gz /course/data/raw/wgbs/SRR13650198_2.fastq.gz
 
-multiqc /course/results/day2_methylation/01_qc \
-    --outdir /course/results/day2_methylation/01_qc/multiqc \
-    --filename Day2_raw_QC
+multiqc /course/results/day2_methylation/01_qc --outdir /course/results/day2_methylation/01_qc/multiqc --filename Day2_raw_QC
 ```
 
 Open `./results/day2_methylation/01_qc/multiqc/Day2_raw_QC.html`.
@@ -134,57 +123,38 @@ sample accession (three control: `SRR13650161/163/165`, three salt: `SRR13650194
 
 ```bash
 # --- SRR13650161 (control) ---
-trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip \
-    --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 \
-    --output_dir /course/results/day2_methylation/02_trimmed \
-    /course/data/raw/wgbs/SRR13650161_1.fastq.gz /course/data/raw/wgbs/SRR13650161_2.fastq.gz
+trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 --output_dir /course/results/day2_methylation/02_trimmed /course/data/raw/wgbs/SRR13650161_1.fastq.gz /course/data/raw/wgbs/SRR13650161_2.fastq.gz
 ```
 
 ```bash
 # --- SRR13650163 (control) ---
-trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip \
-    --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 \
-    --output_dir /course/results/day2_methylation/02_trimmed \
-    /course/data/raw/wgbs/SRR13650163_1.fastq.gz /course/data/raw/wgbs/SRR13650163_2.fastq.gz
+trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 --output_dir /course/results/day2_methylation/02_trimmed /course/data/raw/wgbs/SRR13650163_1.fastq.gz /course/data/raw/wgbs/SRR13650163_2.fastq.gz
 ```
 
 ```bash
 # --- SRR13650165 (control) ---
-trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip \
-    --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 \
-    --output_dir /course/results/day2_methylation/02_trimmed \
-    /course/data/raw/wgbs/SRR13650165_1.fastq.gz /course/data/raw/wgbs/SRR13650165_2.fastq.gz
+trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 --output_dir /course/results/day2_methylation/02_trimmed /course/data/raw/wgbs/SRR13650165_1.fastq.gz /course/data/raw/wgbs/SRR13650165_2.fastq.gz
 ```
 
 ```bash
 # --- SRR13650194 (salt) ---
-trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip \
-    --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 \
-    --output_dir /course/results/day2_methylation/02_trimmed \
-    /course/data/raw/wgbs/SRR13650194_1.fastq.gz /course/data/raw/wgbs/SRR13650194_2.fastq.gz
+trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 --output_dir /course/results/day2_methylation/02_trimmed /course/data/raw/wgbs/SRR13650194_1.fastq.gz /course/data/raw/wgbs/SRR13650194_2.fastq.gz
 ```
 
 ```bash
 # --- SRR13650196 (salt) ---
-trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip \
-    --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 \
-    --output_dir /course/results/day2_methylation/02_trimmed \
-    /course/data/raw/wgbs/SRR13650196_1.fastq.gz /course/data/raw/wgbs/SRR13650196_2.fastq.gz
+trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 --output_dir /course/results/day2_methylation/02_trimmed /course/data/raw/wgbs/SRR13650196_1.fastq.gz /course/data/raw/wgbs/SRR13650196_2.fastq.gz
 ```
 
 ```bash
 # --- SRR13650198 (salt) ---
-trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip \
-    --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 \
-    --output_dir /course/results/day2_methylation/02_trimmed \
-    /course/data/raw/wgbs/SRR13650198_1.fastq.gz /course/data/raw/wgbs/SRR13650198_2.fastq.gz
+trim_galore --paired --cores 4 --quality 20 --stringency 5 --dont_gzip --clip_r1 6 --clip_r2 6 --three_prime_clip_R1 6 --three_prime_clip_R2 6 --output_dir /course/results/day2_methylation/02_trimmed /course/data/raw/wgbs/SRR13650198_1.fastq.gz /course/data/raw/wgbs/SRR13650198_2.fastq.gz
 ```
 
 ### 2.2 Examine trimming report
 
 ```bash
-grep -E "Reads|Pairs|Quality|Adapter" \
-    /course/results/day2_methylation/02_trimmed/SRR13650161_1.fastq.gz_trimming_report.txt
+grep -E "Reads|Pairs|Quality|Adapter" /course/results/day2_methylation/02_trimmed/SRR13650161_1.fastq.gz_trimming_report.txt
 ```
 
 > **Question 3:** Why do we clip 6 bp from the 5′ end of each read (`--clip_r1 6`
@@ -220,50 +190,32 @@ Align **one sample at a time**. Bismark takes the paired reads with `-1` and `-2
 
 ```bash
 # --- SRR13650161 (control) ---
-bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650161 \
-    -1 /course/results/day2_methylation/02_trimmed/SRR13650161_1_val_1.fq \
-    -2 /course/results/day2_methylation/02_trimmed/SRR13650161_2_val_2.fq
+bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650161 -1 /course/results/day2_methylation/02_trimmed/SRR13650161_1_val_1.fq -2 /course/results/day2_methylation/02_trimmed/SRR13650161_2_val_2.fq
 ```
 
 ```bash
 # --- SRR13650163 (control) ---
-bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650163 \
-    -1 /course/results/day2_methylation/02_trimmed/SRR13650163_1_val_1.fq \
-    -2 /course/results/day2_methylation/02_trimmed/SRR13650163_2_val_2.fq
+bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650163 -1 /course/results/day2_methylation/02_trimmed/SRR13650163_1_val_1.fq -2 /course/results/day2_methylation/02_trimmed/SRR13650163_2_val_2.fq
 ```
 
 ```bash
 # --- SRR13650165 (control) ---
-bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650165 \
-    -1 /course/results/day2_methylation/02_trimmed/SRR13650165_1_val_1.fq \
-    -2 /course/results/day2_methylation/02_trimmed/SRR13650165_2_val_2.fq
+bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650165 -1 /course/results/day2_methylation/02_trimmed/SRR13650165_1_val_1.fq -2 /course/results/day2_methylation/02_trimmed/SRR13650165_2_val_2.fq
 ```
 
 ```bash
 # --- SRR13650194 (salt) ---
-bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650194 \
-    -1 /course/results/day2_methylation/02_trimmed/SRR13650194_1_val_1.fq \
-    -2 /course/results/day2_methylation/02_trimmed/SRR13650194_2_val_2.fq
+bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650194 -1 /course/results/day2_methylation/02_trimmed/SRR13650194_1_val_1.fq -2 /course/results/day2_methylation/02_trimmed/SRR13650194_2_val_2.fq
 ```
 
 ```bash
 # --- SRR13650196 (salt) ---
-bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650196 \
-    -1 /course/results/day2_methylation/02_trimmed/SRR13650196_1_val_1.fq \
-    -2 /course/results/day2_methylation/02_trimmed/SRR13650196_2_val_2.fq
+bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650196 -1 /course/results/day2_methylation/02_trimmed/SRR13650196_1_val_1.fq -2 /course/results/day2_methylation/02_trimmed/SRR13650196_2_val_2.fq
 ```
 
 ```bash
 # --- SRR13650198 (salt) ---
-bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650198 \
-    -1 /course/results/day2_methylation/02_trimmed/SRR13650198_1_val_1.fq \
-    -2 /course/results/day2_methylation/02_trimmed/SRR13650198_2_val_2.fq
+bismark --genome /course/data/reference/indices/bismark --bowtie2 --multicore 4 --output_dir /course/results/day2_methylation/03_bismark_aligned --basename SRR13650198 -1 /course/results/day2_methylation/02_trimmed/SRR13650198_1_val_1.fq -2 /course/results/day2_methylation/02_trimmed/SRR13650198_2_val_2.fq
 ```
 
 Each alignment takes a few minutes on this Chr4-sized data.
@@ -286,44 +238,32 @@ Remove duplicates **for each sample** (input `<SAMPLE>_pe.bam` → output
 
 ```bash
 # --- SRR13650161 ---
-deduplicate_bismark --paired \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650161_pe.bam
+deduplicate_bismark --paired --output_dir /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/03_bismark_aligned/SRR13650161_pe.bam
 ```
 
 ```bash
 # --- SRR13650163 ---
-deduplicate_bismark --paired \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650163_pe.bam
+deduplicate_bismark --paired --output_dir /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/03_bismark_aligned/SRR13650163_pe.bam
 ```
 
 ```bash
 # --- SRR13650165 ---
-deduplicate_bismark --paired \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650165_pe.bam
+deduplicate_bismark --paired --output_dir /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/03_bismark_aligned/SRR13650165_pe.bam
 ```
 
 ```bash
 # --- SRR13650194 ---
-deduplicate_bismark --paired \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650194_pe.bam
+deduplicate_bismark --paired --output_dir /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/03_bismark_aligned/SRR13650194_pe.bam
 ```
 
 ```bash
 # --- SRR13650196 ---
-deduplicate_bismark --paired \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650196_pe.bam
+deduplicate_bismark --paired --output_dir /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/03_bismark_aligned/SRR13650196_pe.bam
 ```
 
 ```bash
 # --- SRR13650198 ---
-deduplicate_bismark --paired \
-    --output_dir /course/results/day2_methylation/03_bismark_aligned \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650198_pe.bam
+deduplicate_bismark --paired --output_dir /course/results/day2_methylation/03_bismark_aligned /course/results/day2_methylation/03_bismark_aligned/SRR13650198_pe.bam
 ```
 
 > **Question 5:** Why is deduplication especially important for WGBS data?
@@ -345,68 +285,44 @@ methylKit will pick up in Part 5.
 
 ```bash
 # --- SRR13650161 ---
-bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX \
-    --genome_folder /course/data/reference/indices/bismark --parallel 4 \
-    --output_dir /course/results/day2_methylation/04_methylation \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650161_pe.deduplicated.bam
+bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX --genome_folder /course/data/reference/indices/bismark --parallel 4 --output_dir /course/results/day2_methylation/04_methylation /course/results/day2_methylation/03_bismark_aligned/SRR13650161_pe.deduplicated.bam
 
-mv /course/results/day2_methylation/04_methylation/SRR13650161_pe.deduplicated.CX_report.txt \
-   /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
+mv /course/results/day2_methylation/04_methylation/SRR13650161_pe.deduplicated.CX_report.txt /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
 ```
 
 ```bash
 # --- SRR13650163 ---
-bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX \
-    --genome_folder /course/data/reference/indices/bismark --parallel 4 \
-    --output_dir /course/results/day2_methylation/04_methylation \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650163_pe.deduplicated.bam
+bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX --genome_folder /course/data/reference/indices/bismark --parallel 4 --output_dir /course/results/day2_methylation/04_methylation /course/results/day2_methylation/03_bismark_aligned/SRR13650163_pe.deduplicated.bam
 
-mv /course/results/day2_methylation/04_methylation/SRR13650163_pe.deduplicated.CX_report.txt \
-   /course/results/day2_methylation/04_methylation/SRR13650163.CX_report.txt
+mv /course/results/day2_methylation/04_methylation/SRR13650163_pe.deduplicated.CX_report.txt /course/results/day2_methylation/04_methylation/SRR13650163.CX_report.txt
 ```
 
 ```bash
 # --- SRR13650165 ---
-bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX \
-    --genome_folder /course/data/reference/indices/bismark --parallel 4 \
-    --output_dir /course/results/day2_methylation/04_methylation \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650165_pe.deduplicated.bam
+bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX --genome_folder /course/data/reference/indices/bismark --parallel 4 --output_dir /course/results/day2_methylation/04_methylation /course/results/day2_methylation/03_bismark_aligned/SRR13650165_pe.deduplicated.bam
 
-mv /course/results/day2_methylation/04_methylation/SRR13650165_pe.deduplicated.CX_report.txt \
-   /course/results/day2_methylation/04_methylation/SRR13650165.CX_report.txt
+mv /course/results/day2_methylation/04_methylation/SRR13650165_pe.deduplicated.CX_report.txt /course/results/day2_methylation/04_methylation/SRR13650165.CX_report.txt
 ```
 
 ```bash
 # --- SRR13650194 ---
-bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX \
-    --genome_folder /course/data/reference/indices/bismark --parallel 4 \
-    --output_dir /course/results/day2_methylation/04_methylation \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650194_pe.deduplicated.bam
+bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX --genome_folder /course/data/reference/indices/bismark --parallel 4 --output_dir /course/results/day2_methylation/04_methylation /course/results/day2_methylation/03_bismark_aligned/SRR13650194_pe.deduplicated.bam
 
-mv /course/results/day2_methylation/04_methylation/SRR13650194_pe.deduplicated.CX_report.txt \
-   /course/results/day2_methylation/04_methylation/SRR13650194.CX_report.txt
+mv /course/results/day2_methylation/04_methylation/SRR13650194_pe.deduplicated.CX_report.txt /course/results/day2_methylation/04_methylation/SRR13650194.CX_report.txt
 ```
 
 ```bash
 # --- SRR13650196 ---
-bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX \
-    --genome_folder /course/data/reference/indices/bismark --parallel 4 \
-    --output_dir /course/results/day2_methylation/04_methylation \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650196_pe.deduplicated.bam
+bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX --genome_folder /course/data/reference/indices/bismark --parallel 4 --output_dir /course/results/day2_methylation/04_methylation /course/results/day2_methylation/03_bismark_aligned/SRR13650196_pe.deduplicated.bam
 
-mv /course/results/day2_methylation/04_methylation/SRR13650196_pe.deduplicated.CX_report.txt \
-   /course/results/day2_methylation/04_methylation/SRR13650196.CX_report.txt
+mv /course/results/day2_methylation/04_methylation/SRR13650196_pe.deduplicated.CX_report.txt /course/results/day2_methylation/04_methylation/SRR13650196.CX_report.txt
 ```
 
 ```bash
 # --- SRR13650198 ---
-bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX \
-    --genome_folder /course/data/reference/indices/bismark --parallel 4 \
-    --output_dir /course/results/day2_methylation/04_methylation \
-    /course/results/day2_methylation/03_bismark_aligned/SRR13650198_pe.deduplicated.bam
+bismark_methylation_extractor --paired-end --comprehensive --cytosine_report --CX --genome_folder /course/data/reference/indices/bismark --parallel 4 --output_dir /course/results/day2_methylation/04_methylation /course/results/day2_methylation/03_bismark_aligned/SRR13650198_pe.deduplicated.bam
 
-mv /course/results/day2_methylation/04_methylation/SRR13650198_pe.deduplicated.CX_report.txt \
-   /course/results/day2_methylation/04_methylation/SRR13650198.CX_report.txt
+mv /course/results/day2_methylation/04_methylation/SRR13650198_pe.deduplicated.CX_report.txt /course/results/day2_methylation/04_methylation/SRR13650198.CX_report.txt
 ```
 
 ### 4.2 Inspect methylation output
@@ -416,9 +332,7 @@ mv /course/results/day2_methylation/04_methylation/SRR13650198_pe.deduplicated.C
 head -20 /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
 
 # Count cytosines per context
-awk 'NR>1 {print $6}' \
-    /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt \
-    | sort | uniq -c
+awk 'NR>1 {print $6}' /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt | sort | uniq -c
 ```
 
 > **Question 6:** The cytosine report has 7 columns. What information does each
@@ -429,8 +343,7 @@ awk 'NR>1 {print $6}' \
 # Calculate mean CpG methylation
 awk '$6 == "CG" && ($4+$5) > 0 {sum += $4/($4+$5); n++}
 
-     END {printf "Mean CpG methylation: %.2f%%\n", sum/n*100}' \
-    /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
+     END {printf "Mean CpG methylation: %.2f%%\n", sum/n*100}' /course/results/day2_methylation/04_methylation/SRR13650161.CX_report.txt
 ```
 
 ---
