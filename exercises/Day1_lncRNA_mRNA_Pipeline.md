@@ -590,21 +590,26 @@ bash /home/student/workshop/scripts/run_all.sh --with-ballgown
 ## End of Day 1 – Well Done!
 
 Your tables and figures are under `results/` (visible in the JupyterLab file browser).
-To keep them after the container stops, download the `results/` folder from the file
-browser. To get it, just run in a terminal tab:
+**This image has no bind-mount by default** — everything you produced only exists inside
+the running container, so download it **before** you close or stop the container, or it
+is gone for good.
+
+**1. Archive it**, in a terminal tab:
 
 ```bash
 cd /home/student && tar czf day1_results.tar.gz results/
 ```
-then refresh + download. Do this before you close/stop the container — once it stops, everything inside it is gone.
 
-In your JupyterLab browser tab, click the refresh icon at the top of the file browser (left sidebar).
-You'll see a new file at the top level: day1_results.tar.gz.
-Right-click it → Download. It saves to your normal Downloads folder.
-Locally, extract it: tar xzf day1_results.tar.gz → gives you back the results/ folder.
-If you ever need to redo this yourself (e.g. after running more steps), 
+**2. Download it** from the JupyterLab browser tab: click the refresh icon at the top of
+the file browser (left sidebar), find the new `day1_results.tar.gz` at the top level,
+right-click it → **Download**. It saves to your normal Downloads folder.
 
-or re-run with a bind-mount:
+**3. Extract it** locally: `tar xzf day1_results.tar.gz` gives you back the `results/`
+folder.
+
+If you re-run the pipeline later (e.g. after fixing something), just repeat steps 1–3 —
+or, to skip manual export entirely on future runs, launch with a bind-mount instead so
+results persist automatically:
 
 ```bash
 docker run --rm -p 8888:8888 -e JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1 -e SHELL=/bin/bash -v "$PWD/day1_results":/home/student/results leogiuffre/lncrna-mnps-workshop:1.0
