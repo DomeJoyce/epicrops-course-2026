@@ -5,7 +5,7 @@
 # Covers CpG, CHG and CHH contexts; produces DMR tables and publication
 # quality visualisations.
 #
-# The Epi-Code – Florence Training School 2026
+# The Epi-Code - Florence Training School 2026
 # Day 2: Whole-Genome Bisulfite Sequencing Analysis
 # =============================================================================
 
@@ -35,7 +35,7 @@ out_dir     <- ifelse(length(args) >= 3, args[3],
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("============================================================\n")
-cat("  methylKit – Differential Methylation Analysis\n")
+cat("  methylKit - Differential Methylation Analysis\n")
 cat("  Input  :", meth_dir, "\n")
 cat("  Samples:", samplesheet, "\n")
 cat("  Output :", out_dir, "\n")
@@ -120,17 +120,17 @@ cat("\n[2/7] QC plots and descriptive statistics...\n")
 ## 2a. Methylation distribution histograms (CpG)
 pdf(file.path(out_dir, "QC_methylation_histograms.pdf"), width = 10, height = 6)
 getMethylationStats(myobj_CpG[[1]], plot = TRUE, both.strands = FALSE)
-title(paste("CpG Methylation –", meta$sample_id[1]))
+title(paste("CpG Methylation -", meta$sample_id[1]))
 getMethylationStats(myobj_CpG[[2]], plot = TRUE, both.strands = FALSE)
-title(paste("CpG Methylation –", meta$sample_id[2]))
+title(paste("CpG Methylation -", meta$sample_id[2]))
 dev.off()
 
 ## 2b. Coverage statistics
 pdf(file.path(out_dir, "QC_coverage_histograms.pdf"), width = 10, height = 6)
 getCoverageStats(myobj_CpG[[1]], plot = TRUE, both.strands = FALSE)
-title(paste("Coverage –", meta$sample_id[1]))
+title(paste("Coverage -", meta$sample_id[1]))
 getCoverageStats(myobj_CpG[[2]], plot = TRUE, both.strands = FALSE)
-title(paste("Coverage –", meta$sample_id[2]))
+title(paste("Coverage -", meta$sample_id[2]))
 dev.off()
 
 cat("  → QC histograms saved\n")
@@ -172,17 +172,17 @@ cat("\n[4/7] Sample correlation and hierarchical clustering...\n")
 
 pdf(file.path(out_dir, "Correlation_and_Clustering_CpG.pdf"), width = 8, height = 6)
 getCorrelation(meth_CpG, plot = TRUE)
-title("Sample Pearson correlation – CpG methylation")
+title("Sample Pearson correlation - CpG methylation")
 
 clusterSamples(meth_CpG, dist = "correlation", method = "ward",
                plot = TRUE)
-title("Hierarchical clustering – CpG methylation")
+title("Hierarchical clustering - CpG methylation")
 
 PCASamples(meth_CpG, screeplot = TRUE)
-title("PCA screeplot – CpG methylation")
+title("PCA screeplot - CpG methylation")
 
 PCASamples(meth_CpG)
-title("PCA – CpG methylation")
+title("PCA - CpG methylation")
 dev.off()
 
 cat("  → Correlation and clustering plots saved\n")
@@ -228,7 +228,7 @@ myDiff_CHH <- diff_meth_cytosine(meth_CHH, "CHH")
 # ─────────────────────────────────────────────────────────────────────────────
 # 6. Tiling window analysis (DMRs, 200 bp tiles)
 # ─────────────────────────────────────────────────────────────────────────────
-cat("\n[6/7] Tiling window analysis (200 bp bins – DMRs)...\n")
+cat("\n[6/7] Tiling window analysis (200 bp bins - DMRs)...\n")
 
 tile_analysis <- function(myobj_raw, context_name, q = 0.05, diff = 20) {
 
@@ -319,7 +319,7 @@ cat("  → Context barplot saved\n")
 ## 7b. Chromosome methylation track (CpG, sliding window average)
 pdf(file.path(out_dir, "Chr4_methylation_track_CpG.pdf"), width = 12, height = 4)
 plot(myDiff_CpG, chromosome = "Chr4", col = c("firebrick", "steelblue"),
-     lwd = 2, main = "CpG methylation track – Chr4")
+     lwd = 2, main = "CpG methylation track - Chr4")
 dev.off()
 cat("  → Chr4 methylation track saved\n")
 
@@ -341,7 +341,7 @@ p_scatter <- ggplot(diff_data_CpG,
                                  "Not significant" = "grey70")) +
   scale_x_log10() +
   labs(
-    title  = "CpG differential methylation – coverage vs % difference",
+    title  = "CpG differential methylation - coverage vs % difference",
     x      = "Total coverage (log10)",
     y      = "Methylation difference (%)",
     color  = NULL,
