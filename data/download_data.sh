@@ -47,33 +47,63 @@ ena_fastq_urls() {
         | tail -n +2 | cut -f2
 }
 
-# ── Stream a gzipped FASTQ and keep only the first N reads (4N lines) ─────────
-# pipefail is OFF here: `head` closing the pipe makes curl/zcat exit non-zero
-# by design (SIGPIPE); we validate the result by counting reads afterwards.
-# Retries a few times, because the ENA mirror occasionally drops the first
-# connection (a transient empty download that must NOT abort the whole run).
+# ── Download the first N reads of a remote gzipped FASTQ (robust/resumable) ───
+# We only need the first N reads, not the whole multi-GB run. The old approach
+# streamed the entire file through `zcat | head` and let `head` close the pipe.
+# That is fragile: on a network that STALLS right after the TLS handshake — very
+# common inside Docker (broken IPv6, an MTU mismatch on the bridge, or a
+# proxy/firewall) — curl delivers only its first buffer (~1 KB, i.e. ~50
+# decompressed lines) and every plain retry restarts from byte 0 and stalls
+# again at the same point (the "got 50 lines" failure).
+#
+# Instead we fetch a BOUNDED, RESUMABLE byte-range prefix that already contains
+# enough reads, then cut it to exactly N. Because each retry resumes from the
+# bytes already on disk (Range: <have>-), a transient stall makes progress
+# instead of looping forever on the same 1 KB. -4 avoids broken IPv6, -f fails
+# on HTTP errors (so a proxy error page never masquerades as data), and the
+# lenient --speed-limit/--speed-time only aborts a truly DEAD transfer.
 stream_head() {
     local URL=$1 OUT=$2 NREADS=$3
     local LINES=$(( NREADS * 4 ))
-    local attempt got
-    for attempt in 1 2 3 4; do
-        ( set +e +o pipefail
-          # --speed-limit/--speed-time abort a STALLED transfer (ENA sometimes
-          # accepts the connection then streams at ~0 B/s), so the retry loop can
-          # reconnect instead of hanging forever; --connect-timeout guards the dial.
-          curl -s --retry 5 --retry-delay 3 --connect-timeout 30 \
-            --speed-limit 1000 --speed-time 20 "https://${URL}" \
-            | zcat 2>/dev/null | head -n "${LINES}" | gzip > "${OUT}"
-        )
-        got=$(zcat "${OUT}" 2>/dev/null | head -n "${LINES}" | wc -l)
-        if [[ "${got}" -ge 4 && $(( got % 4 )) -eq 0 ]]; then
-            echo "    -> ${OUT}  ($(( got / 4 )) reads)"
-            return 0
+    local tmp="${OUT}.part"
+    # ~62 compressed bytes/read for this dataset; 90 gives ~1.45x headroom so a
+    # worse-compressing run still yields >= N reads. Floor at 1 MB for tiny N.
+    local want=$(( NREADS * 90 )); (( want < 1048576 )) && want=1048576
+    rm -f "${tmp}"; : > "${tmp}"
+    local have=0 stall=0 iter=0 new
+    while (( have < want && stall < 6 && iter < 40 )); do
+        iter=$(( iter + 1 ))
+        # Resume: request the range starting at the bytes we already have and
+        # APPEND. A byte-exact prefix of a gzip file is itself valid to decode.
+        curl -s -4 -L -f --connect-timeout 30 --max-time 600 \
+             --speed-limit 1024 --speed-time 30 --retry 3 --retry-delay 3 \
+             -r "${have}-$(( want - 1 ))" "https://${URL}" >> "${tmp}" 2>/dev/null || true
+        new=$(stat -c%s "${tmp}" 2>/dev/null || echo 0)
+        if (( new > have )); then
+            have=${new}; stall=0
+        else
+            stall=$(( stall + 1 ))
+            echo "    .. $(basename "${OUT}"): no progress at $(( have/1024 )) KB (retry ${stall}/6)" >&2
+            sleep 3
         fi
-        echo "    .. attempt ${attempt} for $(basename "${OUT}") got ${got} lines; retrying..." >&2
-        sleep 5
     done
-    echo "    !! ERROR: ${OUT} still invalid after retries. Check your internet / the ENA mirror." >&2
+    # Cut to exactly N whole reads, recompress, then drop the temp prefix.
+    zcat "${tmp}" 2>/dev/null | head -n "${LINES}" | gzip > "${OUT}"
+    rm -f "${tmp}"
+    local got
+    got=$(zcat "${OUT}" 2>/dev/null | wc -l)
+    got=$(( got - got % 4 ))                       # ignore a partial trailing read
+    if [[ "${got}" -ge 4 ]]; then
+        echo "    -> ${OUT}  ($(( got / 4 )) reads)"
+        [[ "${got}" -lt "${LINES}" ]] \
+            && echo "    (note: kept $(( got / 4 )) of ${NREADS} requested reads)" >&2
+        return 0
+    fi
+    echo "    !! ERROR: could not download ${OUT} (only got ${got} lines)." >&2
+    echo "       The transfer stalled after the first bytes. This is almost always the" >&2
+    echo "       network, not the data: a proxy/firewall, broken IPv6, or a Docker MTU" >&2
+    echo "       mismatch. Try another network, run this script on the host (outside the" >&2
+    echo "       container), or set the Docker daemon MTU to 1400 and retry." >&2
     return 1
 }
 
