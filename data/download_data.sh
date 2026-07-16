@@ -27,6 +27,10 @@ RAW_DIR="${DATA_DIR}/raw"
 # Read PAIRS to keep per sample (override: download_data.sh <wgbs_pairs>)
 WGBS_PAIRS="${1:-2000000}"        # read PAIRS (each mate truncated to this many)
 
+# control (Col-0) then salt-stress (Col-0 + NaCl) — used by both the download
+# loop and the final completeness check below, so it lives in one place.
+SAMPLES=(SRR13650161 SRR13650163 SRR13650165 SRR13650194 SRR13650196 SRR13650198)
+
 ENA_API="https://www.ebi.ac.uk/ena/portal/api/filereport"
 
 mkdir -p "${RAW_DIR}/wgbs"
@@ -69,10 +73,16 @@ stream_head() {
     return 1
 }
 
+# A pair counts as "already done" only if BOTH mates exist AND are valid gzip.
+# A download killed mid-stream leaves a truncated, non-empty file that `-s`
+# would wrongly accept (feeding corrupt reads to the pipeline); `gzip -t`
+# rejects it so the next run re-fetches it.
+pair_ok() { [[ -s "$1" && -s "$2" ]] && gzip -t "$1" 2>/dev/null && gzip -t "$2" 2>/dev/null; }
+
 download_pe() {
     local SRR=$1 OUT_DIR=$2
     local O1="${OUT_DIR}/${SRR}_1.fastq.gz" O2="${OUT_DIR}/${SRR}_2.fastq.gz"
-    if [[ -s "${O1}" && -s "${O2}" ]]; then echo "[=] ${SRR} present, skipping."; return 0; fi
+    if pair_ok "${O1}" "${O2}"; then echo "[=] ${SRR} present, skipping."; return 0; fi
     echo "[+] ${SRR} (paired-end)..."
     local urls u1 u2
     urls=$(ena_fastq_urls "${SRR}")
@@ -86,8 +96,10 @@ download_pe() {
 
 # ── Day 2: WGBS ──────────────────────────────────────────────────────────────
 echo ""; echo "--- Day 2: WGBS (control vs salt stress) ---"
-for SRR in SRR13650161 SRR13650163 SRR13650165 SRR13650194 SRR13650196 SRR13650198; do
-    download_pe "${SRR}" "${RAW_DIR}/wgbs"
+for SRR in "${SAMPLES[@]}"; do
+    # One flaky sample must NOT abort the rest (set -e would). Log and carry on;
+    # every file is resumable, so re-running the script fills in what's missing.
+    download_pe "${SRR}" "${RAW_DIR}/wgbs" || echo "[!] ${SRR} incomplete — re-run to resume" >&2
 done
 
 # ── Sample sheet ─────────────────────────────────────────────────────────────
@@ -105,7 +117,17 @@ EOF
 
 echo ""
 echo "============================================================"
-echo " Download COMPLETE"
-echo "   WGBS : ${RAW_DIR}/wgbs/   (6 samples, control vs salt)"
+missing=0
+for SRR in "${SAMPLES[@]}"; do
+    pair_ok "${RAW_DIR}/wgbs/${SRR}_1.fastq.gz" "${RAW_DIR}/wgbs/${SRR}_2.fastq.gz" \
+        || { echo " [MISSING] ${SRR}"; missing=$(( missing + 1 )); }
+done
+if [[ ${missing} -eq 0 ]]; then
+    echo " Download COMPLETE — all ${#SAMPLES[@]} WGBS samples present"
+else
+    echo " ${missing}/${#SAMPLES[@]} sample(s) still incomplete — re-run this script to resume"
+fi
+echo "   WGBS : ${RAW_DIR}/wgbs/   (control vs salt)"
 echo "============================================================"
 ls -lh "${RAW_DIR}/wgbs/"
+[[ ${missing} -eq 0 ]]   # exit non-zero if anything is still missing (preflight-friendly)

@@ -21,6 +21,8 @@ HANDOFF.md
 *.fastq
 *.fastq.gz
 *.fq
+*.log
+.ipynb_checkpoints/
 __pycache__/
 *.pyc
 .DS_Store
