@@ -66,9 +66,9 @@ stream_head() {
     local URL=$1 OUT=$2 NREADS=$3
     local LINES=$(( NREADS * 4 ))
     local tmp="${OUT}.part"
-    # ~62 compressed bytes/read for this dataset; 90 gives ~1.45x headroom so a
+    # ~62 compressed bytes/read for this dataset; 100 gives ~1.6x headroom so a
     # worse-compressing run still yields >= N reads. Floor at 1 MB for tiny N.
-    local want=$(( NREADS * 90 )); (( want < 1048576 )) && want=1048576
+    local want=$(( NREADS * 100 )); (( want < 1048576 )) && want=1048576
     rm -f "${tmp}"; : > "${tmp}"
     local have=0 stall=0 iter=0 new
     while (( have < want && stall < 6 && iter < 40 )); do
@@ -93,17 +93,26 @@ stream_head() {
     local got
     got=$(zcat "${OUT}" 2>/dev/null | wc -l)
     got=$(( got - got % 4 ))                       # ignore a partial trailing read
-    if [[ "${got}" -ge 4 ]]; then
+    # Success only if we actually got (essentially) all N reads. The prefix is
+    # sized with ~1.6x headroom, so a healthy transfer yields exactly N; anything
+    # much smaller means the transfer STALLED and was truncated. We must NOT
+    # accept that silently — a handful of reads would poison the whole pipeline —
+    # and we delete the partial file so a re-run re-fetches it (otherwise the
+    # gzip-valid stub would be treated as "already downloaded").
+    local need=$(( LINES * 95 / 100 ))
+    if [[ "${got}" -ge "${need}" ]]; then
         echo "    -> ${OUT}  ($(( got / 4 )) reads)"
-        [[ "${got}" -lt "${LINES}" ]] \
-            && echo "    (note: kept $(( got / 4 )) of ${NREADS} requested reads)" >&2
         return 0
     fi
-    echo "    !! ERROR: could not download ${OUT} (only got ${got} lines)." >&2
-    echo "       The transfer stalled after the first bytes. This is almost always the" >&2
-    echo "       network, not the data: a proxy/firewall, broken IPv6, or a Docker MTU" >&2
-    echo "       mismatch. Try another network, run this script on the host (outside the" >&2
-    echo "       container), or set the Docker daemon MTU to 1400 and retry." >&2
+    rm -f "${OUT}"
+    echo "    !! ERROR: ${OUT} truncated — got only $(( got / 4 )) of ${NREADS} reads." >&2
+    echo "       The download connected but the bulk transfer STALLED after the first" >&2
+    echo "       kilobyte. This is the network, not the data (the ENA file is a valid" >&2
+    echo "       ~3 GB gzip). The usual cause inside Docker is an MTU mismatch on the" >&2
+    echo "       bridge network (full-size packets are silently dropped). Fixes:" >&2
+    echo "         * set the Docker bridge MTU to 1400 (see README / daemon.json), or" >&2
+    echo "         * run this download on the host, outside the container, or" >&2
+    echo "         * switch to a network without a proxy/firewall in the way." >&2
     return 1
 }
 
