@@ -66,17 +66,23 @@ stream_head() {
     local URL=$1 OUT=$2 NREADS=$3
     local LINES=$(( NREADS * 4 ))
     local tmp="${OUT}.part"
-    # ~62 compressed bytes/read for this dataset; 100 gives ~1.6x headroom so a
-    # worse-compressing run still yields >= N reads. Floor at 1 MB for tiny N.
-    local want=$(( NREADS * 100 )); (( want < 1048576 )) && want=1048576
+    # ~62 compressed bytes/read for this dataset; 80 gives ~1.3x headroom so a
+    # worse-compressing run still yields >= N reads without over-downloading on a
+    # slow link. Floor at 1 MB for tiny N.
+    local want=$(( NREADS * 80 )); (( want < 1048576 )) && want=1048576
     rm -f "${tmp}"; : > "${tmp}"
     local have=0 stall=0 iter=0 new
     while (( have < want && stall < 6 && iter < 40 )); do
         iter=$(( iter + 1 ))
         # Resume: request the range starting at the bytes we already have and
         # APPEND. A byte-exact prefix of a gzip file is itself valid to decode.
+        # NOTE: do NOT use curl --retry here. --retry re-issues the SAME range
+        # from its start and appends it again, duplicating bytes and corrupting
+        # the gzip (that truncates zcat to a handful of reads — the "12 reads"
+        # bug). The while-loop below is the retry: it recomputes ${have} from the
+        # file that is actually on disk and resumes cleanly from there.
         curl -s -4 -L -f --connect-timeout 30 --max-time 600 \
-             --speed-limit 1024 --speed-time 30 --retry 3 --retry-delay 3 \
+             --speed-limit 1024 --speed-time 30 \
              -r "${have}-$(( want - 1 ))" "https://${URL}" >> "${tmp}" 2>/dev/null || true
         new=$(stat -c%s "${tmp}" 2>/dev/null || echo 0)
         if (( new > have )); then
