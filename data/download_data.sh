@@ -58,7 +58,11 @@ stream_head() {
     local attempt got
     for attempt in 1 2 3 4; do
         ( set +e +o pipefail
-          curl -s --retry 3 --retry-delay 3 --connect-timeout 30 "https://${URL}" \
+          # --speed-limit/--speed-time abort a STALLED transfer (ENA sometimes
+          # accepts the connection then streams at ~0 B/s), so the retry loop can
+          # reconnect instead of hanging forever; --connect-timeout guards the dial.
+          curl -s --retry 5 --retry-delay 3 --connect-timeout 30 \
+            --speed-limit 1000 --speed-time 20 "https://${URL}" \
             | zcat 2>/dev/null | head -n "${LINES}" | gzip > "${OUT}"
         )
         got=$(zcat "${OUT}" 2>/dev/null | head -n "${LINES}" | wc -l)
