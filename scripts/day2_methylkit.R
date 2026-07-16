@@ -119,18 +119,16 @@ cat("\n[2/7] QC plots and descriptive statistics...\n")
 
 ## 2a. Methylation distribution histograms (CpG)
 pdf(file.path(out_dir, "QC_methylation_histograms.pdf"), width = 10, height = 6)
+# getMethylationStats already draws its own titled histogram (with the sample id);
+# do NOT add a title() on top or the two overlap into unreadable text.
 getMethylationStats(myobj_CpG[[1]], plot = TRUE, both.strands = FALSE)
-title(paste("CpG Methylation -", meta$sample_id[1]))
 getMethylationStats(myobj_CpG[[2]], plot = TRUE, both.strands = FALSE)
-title(paste("CpG Methylation -", meta$sample_id[2]))
 dev.off()
 
 ## 2b. Coverage statistics
 pdf(file.path(out_dir, "QC_coverage_histograms.pdf"), width = 10, height = 6)
 getCoverageStats(myobj_CpG[[1]], plot = TRUE, both.strands = FALSE)
-title(paste("Coverage -", meta$sample_id[1]))
 getCoverageStats(myobj_CpG[[2]], plot = TRUE, both.strands = FALSE)
-title(paste("Coverage -", meta$sample_id[2]))
 dev.off()
 
 cat("  → QC histograms saved\n")
@@ -170,19 +168,13 @@ meth_CHH <- run_analysis_for_context(myobj_CHH, "CHH")
 # ─────────────────────────────────────────────────────────────────────────────
 cat("\n[4/7] Sample correlation and hierarchical clustering...\n")
 
-pdf(file.path(out_dir, "Correlation_and_Clustering_CpG.pdf"), width = 8, height = 6)
+pdf(file.path(out_dir, "Correlation_and_Clustering_CpG.pdf"), width = 9, height = 8)
+# Each methylKit plot draws its own title; adding title() on top overlaps them
+# into unreadable text, so we keep only methylKit's built-in titles here.
 getCorrelation(meth_CpG, plot = TRUE)
-title("Sample Pearson correlation - CpG methylation")
-
-clusterSamples(meth_CpG, dist = "correlation", method = "ward",
-               plot = TRUE)
-title("Hierarchical clustering - CpG methylation")
-
+clusterSamples(meth_CpG, dist = "correlation", method = "ward", plot = TRUE)
 PCASamples(meth_CpG, screeplot = TRUE)
-title("PCA screeplot - CpG methylation")
-
 PCASamples(meth_CpG)
-title("PCA - CpG methylation")
 dev.off()
 
 cat("  → Correlation and clustering plots saved\n")
@@ -316,10 +308,38 @@ ggsave(file.path(out_dir, "Methylation_context_barplot.png"),
        p_context, width = 6, height = 5, dpi = 150)
 cat("  → Context barplot saved\n")
 
-## 7b. Chromosome methylation track (CpG, sliding window average)
-pdf(file.path(out_dir, "Chr4_methylation_track_CpG.pdf"), width = 12, height = 4)
-plot(myDiff_CpG, chromosome = "Chr4", col = c("firebrick", "steelblue"),
-     lwd = 2, main = "CpG methylation track - Chr4")
+## 7b. CpG methylation-difference track along Chr4.
+## Per-cytosine methylation difference (salt - control) ordered by genomic
+## position, with the significant 200 bp DMRs highlighted. NOTE: base plot() on
+## a methylDiff object draws an unreadable 7x7 scatterplot matrix (pairs), so the
+## track is built explicitly from the difference values and coordinates.
+dmc_track <- getData(myDiff_CpG)
+dmc_track <- dmc_track[order(dmc_track$start), ]
+dmr_sig   <- getData(getMethylDiff(DMR_CpG, difference = 20, qvalue = 0.05, type = "all"))
+
+pdf(file.path(out_dir, "Chr4_methylation_track_CpG.pdf"), width = 14, height = 5)
+par(mar = c(5, 5, 4, 2))
+plot(dmc_track$start / 1e6, dmc_track$meth.diff,
+     type = "h", col = "grey60", lwd = 1, ylim = c(-100, 100),
+     xlab = "Chr4 coordinate (Mb)",
+     ylab = "CpG methylation difference\n(salt - control, %)",
+     main = "CpG methylation-difference track - Arabidopsis Chr4",
+     cex.lab = 1.2, cex.axis = 1.1, cex.main = 1.3)
+abline(h = 0, col = "black")
+abline(h = c(-20, 20), lty = 2, col = "grey40")   # matches the DMR calling cutoff (diff >= 20)
+if (nrow(dmr_sig) > 0) {
+  o   <- order(dmr_sig$start)
+  mid <- (dmr_sig$start[o] + dmr_sig$end[o]) / 2 / 1e6
+  yv  <- dmr_sig$meth.diff[o]
+  points(mid, yv, pch = 19, col = "firebrick", cex = 1.5)
+  # Stagger labels up/down so values don't collide where DMRs cluster together.
+  text(mid, yv + ifelse(seq_along(mid) %% 2 == 0, 11, -11),
+       labels = sprintf("%.0f%%", yv), cex = 0.8, col = "firebrick")
+}
+legend("bottomright", bty = "n", cex = 1.0,
+       legend = c("per-CpG difference", "significant 200 bp DMR (q<0.05)", "+/-20% DMR threshold"),
+       col = c("grey60", "firebrick", "grey40"),
+       lty = c(1, NA, 2), pch = c(NA, 19, NA), lwd = c(1, NA, 1))
 dev.off()
 cat("  → Chr4 methylation track saved\n")
 

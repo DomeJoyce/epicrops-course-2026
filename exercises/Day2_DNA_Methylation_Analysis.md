@@ -84,6 +84,22 @@ Either way, results write to `results/day2_methylation/` **on your laptop** auto
 > **Laptop note.** Commands below use **4** CPU threads. On a small laptop, change each `4`
 > to `2`.
 
+### First-time setup — environment check, reference & data
+
+Run these three **once** (a few minutes total). Each is safe to re-run and skips whatever is
+already done, so it is also how you resume if a download was interrupted:
+
+```bash
+bash $SCRIPTS_DIR/validate_env.sh           # checks every tool + R package; must print "ALL GOOD"
+bash $SCRIPTS_DIR/00_setup_reference.sh 4   # builds the Arabidopsis Chr4 Bismark/Bowtie2 indices
+bash $DATA_DIR/download_data.sh             # downloads + subsamples the 6 WGBS libraries (control vs salt)
+```
+
+You are ready when `validate_env.sh` ends with **ALL GOOD**, the index exists under
+`/course/data/reference/indices/bismark/`, and `ls /course/data/raw/wgbs/` shows the 12 FASTQ
+files plus `samplesheet.tsv`. Then follow Part 1 onward — or run the whole pipeline at once
+with `bash $SCRIPTS_DIR/run_day2.sh 4`.
+
 ---
 
 ## Part 1 – Quality Control of Bisulfite-Seq Data
