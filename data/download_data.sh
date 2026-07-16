@@ -116,11 +116,18 @@ stream_head() {
     return 1
 }
 
-# A pair counts as "already done" only if BOTH mates exist AND are valid gzip.
-# A download killed mid-stream leaves a truncated, non-empty file that `-s`
-# would wrongly accept (feeding corrupt reads to the pipeline); `gzip -t`
-# rejects it so the next run re-fetches it.
-pair_ok() { [[ -s "$1" && -s "$2" ]] && gzip -t "$1" 2>/dev/null && gzip -t "$2" 2>/dev/null; }
+# A pair counts as "already done" only if BOTH mates exist, are valid gzip, AND
+# are large enough to plausibly hold the requested reads. A stalled download can
+# leave a valid-gzip STUB of a few KB (the "12 reads" case); `-s`+`gzip -t` alone
+# would wrongly accept it and skip the re-download forever, so we also require a
+# minimum size (~15 bytes/read is a very conservative floor; real data is ~30-60).
+pair_ok() {
+    local minb=$(( WGBS_PAIRS * 15 )); (( minb < 4096 )) && minb=4096
+    [[ -s "$1" && -s "$2" ]] \
+        && gzip -t "$1" 2>/dev/null && gzip -t "$2" 2>/dev/null \
+        && [[ "$(stat -c%s "$1" 2>/dev/null || echo 0)" -ge "${minb}" ]] \
+        && [[ "$(stat -c%s "$2" 2>/dev/null || echo 0)" -ge "${minb}" ]]
+}
 
 download_pe() {
     local SRR=$1 OUT_DIR=$2
